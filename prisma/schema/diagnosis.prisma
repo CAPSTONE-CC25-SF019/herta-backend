@@ -1,12 +1,13 @@
 model Diagnosis {
-    id        String   @id @default(uuid())
-    diseaseId String   @map("disease_id")
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(uuid())
+  diseaseId String   @map("disease_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-    user     User                  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    userId   String                @map("user_id")
-    symptoms SymptomsOnDiagnoses[]
+  user     User                  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId   String                @map("user_id")
+  symptoms SymptomsOnDiagnoses[]
+  disease  Disease               @relation(fields: [diseaseId], references: [id])
 
-    @@map("diagnoses")
+  @@map("diagnoses")
 }
