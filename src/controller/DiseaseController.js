@@ -75,6 +75,7 @@ const getDiseasesBySymptoms = async (request, h) => {
 
   try {
     const ids = symptomIds.split(',');
+    
     const diseases = await models.disease.findMany({
       where: {
         symptoms: {
