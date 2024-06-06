@@ -4,6 +4,7 @@ import BaseRepository from './BaseRepository.js';
 
 /**
  * Implementation BaseRepository With include CRUD Operations
+ * Supports configurable primary key fields
  *
  * @export
  * @class BaseRepositoryImpl
@@ -18,34 +19,44 @@ export default class BaseRepositoryImpl extends BaseRepository {
   entity;
 
   /**
-   * @param {typeof models[T]} entityName - Prisma model (e.g., prisma.user, prisma.post)
+   * @type {string} Primary key field name to use for operations
    */
-  constructor(entity) {
+  primaryKeyField;
+
+  /**
+   * @param {typeof models[T]} entity - Prisma model (e.g., prisma.user, prisma.post)
+   * @param {string} [primaryKeyField='id'] - Primary key field name (defaults to 'id')
+   */
+  constructor(entity, primaryKeyField = 'id') {
     super();
     this.entity = entity;
+    this.primaryKeyField = primaryKeyField;
   }
 
   /**
-   * Get by ID
+   * Get by primary key value
    *
-   * @param {number|string} id - Most id are located in the primary key in the table that has been defined
-   * @returns {Promise<object>} - Returns one row of data from the database table that the object represents
+   * @param {number|string} value - Value of the primary key field
+   * @returns {Promise<object>} - Returns one row of data from the database table
    * @throws {Error} - Can return error if the retrieved data does not exist
    */
-  async get(id) {
+  async get(value) {
+    const where = {};
+    where[this.primaryKeyField] = value;
+
     const result = await this.entity.findUnique({
-      where: { id }
+      where
     });
 
     return result;
   }
 
   /**
-   * Create Method for Create by ID
+   * Create Method for Create a new entity
    *
    * @param {object} entity - Represents the data to be created represented as an object
-   * @returns {Promise<object>} - Returns one row of data from the database table that the object represents has created
-   * @throws {Error} - Can return error if the retrieved data does has created or conflict
+   * @returns {Promise<object>} - Returns one row of data from the database table that has been created
+   * @throws {Error} - Can return error if the data creation fails or conflicts
    */
   async create(entity) {
     const result = await this.entity.create({
@@ -56,16 +67,19 @@ export default class BaseRepositoryImpl extends BaseRepository {
   }
 
   /**
-   * Update by ID
+   * Update by primary key value
    *
-   * @param {number|string} id - Most id are located in the primary key in the table that has been defined
+   * @param {number|string} value - Value of the primary key field
    * @param {object} entity - Represents the data to be updated represented as an object
-   * @returns {Promise<object>} - Returns one row of data from the database table that the object represents has updated
+   * @returns {Promise<object>} - Returns one row of data from the database table that has been updated
    * @throws {Error} - Can return error if the retrieved data does not exist
    */
-  async update(id, entity) {
+  async update(value, entity) {
+    const where = {};
+    where[this.primaryKeyField] = value;
+
     const result = await this.entity.update({
-      where: { id },
+      where,
       data: entity
     });
 
@@ -73,15 +87,18 @@ export default class BaseRepositoryImpl extends BaseRepository {
   }
 
   /**
-   * Delete by ID
+   * Delete by primary key value
    *
-   * @param {number|string} id - The ID of the entity to delete
+   * @param {number|string} value - Value of the primary key field
    * @returns {Promise<object>} - Returns the deleted entity
    * @throws {Error} - Can return error if the deletion fails
    */
-  async delete(id) {
+  async delete(value) {
+    const where = {};
+    where[this.primaryKeyField] = value;
+
     const result = await this.entity.delete({
-      where: { id }
+      where
     });
 
     return result;
