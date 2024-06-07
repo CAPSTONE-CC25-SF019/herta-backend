@@ -8,10 +8,7 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
   constructor() {
     super(models.Diagnosis);
 
-    /**
-     *
-     * @type {Prisma.DiagnosisDelegate<ExtArgs, ClientOptions>}
-     */
+
     this.diagnoses = models.Diagnosis;
   }
 
@@ -76,14 +73,16 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
   /**
    * Find Diagnosis by ID with optional symptoms inclusion
    * @param {string} id
-   * @param {boolean} [includeSymptoms=true]
+   * @param {boolean} [include=true]
    * @returns {Promise<Object>} Diagnosis details
    */
-  async findById(id, includeSymptoms = true) {
+  async findById(id, include = true) {
     return this.diagnoses.findUnique({
       where: { id },
       include: {
-        symptoms: includeSymptoms
+        symptoms: include,
+        user: include,
+        disease: true
       }
     });
   }
@@ -114,7 +113,8 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
           }
         },
         include: {
-          symptoms: true
+          symptoms: true,
+          disease: true
         }
       });
 
@@ -173,4 +173,48 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
       }))
     };
   }
+
+  async getDiagnosesBySymptoms(symptoms) {
+    return this.diagnoses.findMany({
+      where: {
+        symptoms: {
+          every: {
+            symptom: {
+              in: symptoms
+            }
+          }
+        },
+      },
+      include: {
+        symptoms: true,
+        disease: true
+      }
+    });
+  }
+
+  async getDiagnosesByDiseaseId(diseaseId) {
+    return this.diagnoses.findMany({
+      where: {
+        diseaseId
+      },
+      include: {
+        symptoms: true,
+        disease: true
+      }
+    });
+  }
+
+  async getDiagnosesByUserId(userId) {
+    return this.diagnoses.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        user: true,
+        disease: true
+      }
+    });
+  }
+
+
 }
