@@ -1,0 +1,28 @@
+services:
+  mariadb-dev:
+    image: mariadb
+    restart: always
+    networks:
+      - mariadb-dev-net
+    env_file: ./.docker/env/mysql/.env.dev
+    ports:
+      - '3308:3306'
+    container_name: mariadb-dev
+    volumes:
+      - mariadb-dev-vol:/var/lib/mysql
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 500M
+        reservations:
+          cpus: '0.5'
+          memory: 400M
+
+volumes:
+  mariadb-dev-vol:
+    name: mariadb-dev-vol
+
+networks:
+  mariadb-dev-net:
+    name: mariadb-dev-net
