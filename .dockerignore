@@ -2,7 +2,7 @@
 cert/*
 log/*
 coverage
-github
+.github
 node_modules
 commit.sh
 
