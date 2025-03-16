@@ -8,3 +8,5 @@ commit.sh
 .docker/env/*/.env.dev
 
 cert/*
+
+.idea
