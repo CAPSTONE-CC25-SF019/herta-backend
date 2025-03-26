@@ -1,18 +1,27 @@
 // eslint-disable-next-line no-unused-vars
 import { Prisma } from '@prisma/client';
 
+// eslint-disable-next-line no-unused-vars
+import Hash from '../config/hash/bcrypt.js';
+
 import ErrorService from '../error/ErrorService.js';
 import UsersRepository from '../repository/UsersRepository.js';
 import BaseService from './BaseService.js';
 
 export default class UsersService extends BaseService {
-  constructor() {
+  /**
+   * Create Instance UsersService
+   * @constructor
+   * @param hash {Hash}
+   */
+  constructor(hash) {
     super(new UsersRepository(), 'users');
     /**
-     *
      * @type {UsersRepository}
      */
     this.usersRepository = this.repository;
+
+    this.hash = hash;
   }
 
   /**
@@ -48,8 +57,10 @@ export default class UsersService extends BaseService {
       const data = await this.usersRepository.getByEmail(
         options?.payload?.email
       );
+      if ( !this.hash.verifyPassword(options?.payload.password, data?.password) ) throw ErrorService.unauthorized('email or password wrong');
     } catch (error) {
       return this.handleError(error);
     }
   }
+
 }
