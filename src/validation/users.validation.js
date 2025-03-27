@@ -23,6 +23,12 @@ export default {
       .messages({
         'string.valid': "The role must be equal 'ADMIN', 'MODERATOR', 'BASIC'"
       }),
+    age: Joi.number().required().min(15).max(200).messages({
+      'number.valid': 'The age must be a number',
+      'number.max': 'The age must be maximal 200 years old',
+      'number.min': 'The age must be a minimal 15 years old',
+      'number.required': 'This is required'
+    }),
     image: Joi.string().uri().min(5).messages({
       'string.uri': 'Invalid format image'
     }),
@@ -66,6 +72,12 @@ export default {
       .messages({
         'string.valid': "The role must be equal 'ADMIN', 'MODERATOR', 'BASIC'"
       }),
+    age: Joi.number().required().min(15).max(200).messages({
+      'number.valid': 'The age must be a number',
+      'number.max': 'The age must be maximal 200 years old',
+      'number.min': 'The age must be a minimal 15 years old',
+      'number.required': 'This is required'
+    }),
     image: Joi.string().uri().min(5).messages({
       'string.uri': 'Invalid format image'
     }),

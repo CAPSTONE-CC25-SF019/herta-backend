@@ -1,4 +1,3 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { CompactEncrypt, SignJWT, compactDecrypt, jwtVerify } from 'jose';
 // Import winston types without conflicting with the Logger variable
 // eslint-disable-next-line no-unused-vars
@@ -41,8 +40,8 @@ class AuthJwtMiddleware extends Middleware {
    * @param {Object} [options.roleHierarchy={}] - Hierarchy of roles for access control (e.g., { admin: ['editor', 'user'], editor: ['user'] }).
    */
   constructor(options = {}) {
+    super();
     try {
-      super();
       this.name = options.name || 'auth-jwt-middleware';
       this.algorithms = options.algorithms || {
         jws: 'EdDSA',
@@ -80,6 +79,7 @@ class AuthJwtMiddleware extends Middleware {
         protectedRoutes: this.protectedRoutes
       });
     } catch (error) {
+      this.log.error(error);
       throw error;
     }
   }
@@ -230,6 +230,7 @@ class AuthJwtMiddleware extends Middleware {
    */
   async register(server, options) {
     // Register authentication scheme
+    // eslint-disable-next-line
     server.auth.scheme('authentication', (server, schemeOptions) => {
       return {
         authenticate: async (request, h) => {
