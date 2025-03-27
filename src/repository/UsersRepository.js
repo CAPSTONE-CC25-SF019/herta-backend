@@ -98,12 +98,40 @@ export default class UsersRepository extends BaseRepositoryImpl {
    * @returns {Promise<Object>}
    */
   async getByEmail(email) {
-    return await this.user.findFirstOrThrow({
+    return this.user.findFirstOrThrow({
       where: {
         email
       },
       omit: {
         deletedAt: true
+      }
+    });
+  }
+
+  /**
+   * Update Users By Email
+   * @param email {string}
+   * @param data {Object}
+   * @returns {Promise<void>}
+   */
+  async updateByEmail(email, data) {
+    await this.user.update({
+      where: {
+        email
+      },
+      data
+    });
+  }
+
+  /**
+   * Delete Users By Email
+   * @param email {string}
+   * @returns {Promise<void>}
+   */
+  async deleteByEmail(email) {
+    await this.user.delete({
+      where: {
+        email
       }
     });
   }
