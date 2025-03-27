@@ -1,3 +1,4 @@
+
 import models from '../model/models.js';
 import BaseRepositoryImpl from './BaseRepositoryImpl.js';
 
@@ -132,6 +133,23 @@ export default class UsersRepository extends BaseRepositoryImpl {
     await this.user.delete({
       where: {
         email
+      }
+    });
+  }
+
+  /**
+   * Get User with The All Relation
+   * @param email {string}
+   * @returns {Promise<Prisma.Prisma__UserClient<GetResult<Prisma.$UserPayload<DefaultArgs>, {where: {email}, include: {profile: boolean, diagnoses: boolean}}, "findFirstOrThrow", Prisma.PrismaClientOptions>, never, DefaultArgs, Prisma.PrismaClientOptions>>}
+   */
+  async getUserWithRelationByEmail(email) {
+    return this.user.findFirstOrThrow({
+      where: {
+        email
+      },
+      include: {
+        profile: true,
+        diagnoses: true
       }
     });
   }
