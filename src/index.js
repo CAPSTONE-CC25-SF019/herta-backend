@@ -2,7 +2,9 @@ import Hapi from '@hapi/hapi';
 import Joi from 'joi';
 import process from 'node:process';
 
+import diseaseRoutes from './routes/routes.js';
 import UsersRoutes from './routes/users.routes.js';
+
 
 /**
  * Function init for initialize api
@@ -21,7 +23,10 @@ const init = async (host, port) => {
         }
       }
     });
+
     await UsersRoutes(server);
+    server.route(diseaseRoutes);
+
     server.validator(Joi);
     await server.start();
     console.log(`Server running on ${server.info.uri}`);
