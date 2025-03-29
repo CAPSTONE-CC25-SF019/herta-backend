@@ -1,0 +1,9 @@
+model HealthRecord {
+    id         String   @id @default(uuid())
+    users      User     @relation(fields: [userId], references: [id])
+    userId     String   @map("user_id")
+    heartRate  Int
+    recordedAt DateTime @map("recorded_at")
+
+    @@map("health_records")
+}
