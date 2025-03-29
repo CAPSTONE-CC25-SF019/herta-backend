@@ -23,14 +23,17 @@
     "cert:jwe": "node src/utils/generateKey.js --alg=\"ECDH-ES\" --curve=\"X25519\" --name=\"jwe-key\"",
     "cert:jws:auth": "node src/utils/generateKey.js --alg=\"EdDSA\" --curve=\"Ed25519\" --name=\"jws-access-token-key\" && node src/utils/generateKey.js --alg=\"EdDSA\" --curve=\"Ed25519\" --name=\"jws-refresh-token-key\"",
     "cert:jws:fp": "node src/utils/generateKey.js --alg=\"EdDSA\" --curve=\"Ed25519\" --name=\"jws-fp-key\"",
-    "cert:clear": "rm -rf cert/*"
+    "cert:clear": "rm -rf cert/*",
+    "start:dev": "node --env-file=.env src/index.js"
   },
   "dependencies": {
+    "@hapi/boom": "^10.0.1",
     "@hapi/hapi": "^21.3.12",
     "@hapi/inert": "^7.1.0",
     "@hapi/vision": "^7.0.3",
     "@prisma/client": "^6.4.1",
     "bcrypt": "^5.1.1",
+    "csv-parser": "^3.2.0",
     "hapi-swagger": "^17.3.2",
     "joi": "^17.13.3",
     "jose": "^6.0.8",
