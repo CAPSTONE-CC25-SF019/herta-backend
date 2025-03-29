@@ -1,6 +1,6 @@
 model Diagnosis {
     id        String   @id @default(uuid())
-    disease   String   @db.VarChar(255)
+    diseaseId String   @map("disease_id")
     treatment String   @db.MediumText
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
