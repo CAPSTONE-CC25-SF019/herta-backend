@@ -55,6 +55,11 @@ const models = {
   Symptom: getPrismaInstance().symptom,
 
   /**
+   * Disease Model
+   */
+  Disease: getPrismaInstance().disease, 
+
+  /**
    * Symptoms On Diagnoses Model
    */
   SymptomsOnDiagnoses: getPrismaInstance().symptomsOnDiagnoses,
