@@ -1,0 +1,15 @@
+enum Gender {
+    MALE
+    FEMALE
+}
+
+model Profile {
+    id        String @id @default(uuid())
+    image     String @db.Text
+    user      User   @relation(fields: [userEmail], references: [email], onDelete: Cascade, onUpdate: Cascade)
+    age       Int
+    gender    Gender
+    userEmail String @unique @map("user_email")
+
+    @@map("profile")
+}
