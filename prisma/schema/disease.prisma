@@ -1,0 +1,9 @@
+model Disease {
+  id          String        @id @default(uuid())
+  name        String        @unique
+  image       String?        
+  description String?
+
+  symptoms SymptomsOnDiseases[]
+  @@map("diseases")
+}
