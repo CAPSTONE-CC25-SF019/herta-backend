@@ -3,7 +3,9 @@ model Symptom {
     name        String
     description String
 
-    diagnoses SymptomsOnDiagnoses[]
+    diseases SymptomsOnDiseases[]
 
+    diagnoses SymptomsOnDiagnoses[]
+    
     @@map("symptoms")
 }
