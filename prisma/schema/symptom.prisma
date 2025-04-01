@@ -1,0 +1,9 @@
+model Symptom {
+    id          String @id @default(uuid())
+    name        String
+    description String
+
+    diagnoses SymptomsOnDiagnoses[]
+
+    @@map("symptoms")
+}
