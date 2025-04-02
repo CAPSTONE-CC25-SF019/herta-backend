@@ -1,0 +1,10 @@
+model SymptomsOnDiseases {
+    disease   Disease @relation(fields: [diseaseId], references: [id])
+    diseaseId String    @map("disease_id")
+
+    symptom   Symptom @relation(fields: [symptomId], references: [id])
+    symptomId String  @map("symptom_id")
+
+    @@id([diseaseId, symptomId])
+    @@map("symptoms_on_diseases")
+}
