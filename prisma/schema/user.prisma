@@ -1,20 +1,19 @@
 enum Role {
   ADMIN
-  MODERATOR
   USER
 }
 
 model User {
-  id         String         @id @default(cuid())
-  username   String         @db.VarChar(255)
-  email      String         @unique @db.VarChar(255)
-  password   String
-  role       Role           @default(USER)
-  createdAt  DateTime       @default(now()) @map("created_at")
-  updatedAt  DateTime       @updatedAt @map("updated_at")
-  deletedAt  DateTime?     @map("deleted_at")
-  profile    Profile?
-  diagnoses  Diagnosis[]
+  id        String      @id @default(cuid())
+  username  String      @db.VarChar(255)
+  email     String      @unique @db.VarChar(255)
+  password  String
+  role      Role        @default(USER)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  deletedAt DateTime?   @map("deleted_at")
+  profile   Profile?
+  diagnoses Diagnosis[]
 
   @@map("users")
 }
