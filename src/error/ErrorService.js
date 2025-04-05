@@ -80,7 +80,7 @@ export default class ErrorService extends Error {
 
   /**
    * Create an unauthorized error
-   * @param {string} message - Error message
+   * @param {Error} message - Error message
    * @returns {ErrorService}
    */
   static unauthorized(message) {
