@@ -3,14 +3,15 @@ import bcrypt from 'bcrypt';
 export default class Hash {
   constructor() {
     try {
-      this.salt = bcrypt.genSaltSync(process.env.HASH_SALT | 10);
-      this.secret =
-        process.env.HASH_SECRET_KEY |
-        new Error(
-          `required the secret key cannot be empty. please fill with env variable HASH_SECRET_KEY.`
+      this.salt = bcrypt.genSaltSync(parseInt(process.env.HASH_SALT) || 10);
+      this.secret = process.env.HASH_SECRET_KEY;
+      if (!this.secret) {
+        throw new Error(
+          'Required: The secret key cannot be empty. Please set HASH_SECRET_KEY in the environment variables.'
         );
+      }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       throw error;
     }
   }
@@ -21,7 +22,7 @@ export default class Hash {
    * @returns {string}
    */
   hashPassword(password) {
-    return bcrypt.hashSync(password, process.env.HASH_SECRET_KEY);
+    return bcrypt.hashSync(password, this.salt);
   }
 
   /**
