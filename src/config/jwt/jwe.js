@@ -31,11 +31,16 @@ export default class Jwe {
    * @returns {Promise<string>}
    */
   async encryptPayload(payload) {
-    return await new CompactEncrypt(
-      this.encoder.encode(JSON.stringify(payload))
-    )
-      .setProtectedHeader({ alg: this.algorithm, enc: 'A256GCM' })
-      .encrypt(this.publicKey);
+    try {
+      const encodedPayload = this.encoder.encode(JSON.stringify(payload));
+      const encrypter = new CompactEncrypt(encodedPayload);
+      encrypter.setProtectedHeader({ alg: this.algorithm, enc: 'A256GCM' });
+
+      return await encrypter.encrypt(this.publicKey);
+    } catch (error) {
+      console.error('Error encrypting payload:', error);
+      throw error;
+    }
   }
 
   /**
@@ -47,10 +52,16 @@ export default class Jwe {
    * @throws {Error} - Error if the encryptedPayload invalid format
    */
   async decryptPayload(encryptedPayload) {
-    return JSON.parse(
-      this.decoder.decode(
-        (await compactDecrypt(encryptedPayload, this.privateKey)).plaintext
-      )
-    );
+    try {
+      const decryptResult = await compactDecrypt(
+        encryptedPayload,
+        this.privateKey
+      );
+      const decodedResult = this.decoder.decode(decryptResult.plaintext);
+      return JSON.parse(decodedResult);
+    } catch (error) {
+      console.error('Error decrypting payload:', error);
+      throw error;
+    }
   }
 }
