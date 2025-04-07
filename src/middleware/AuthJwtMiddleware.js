@@ -1,4 +1,3 @@
-import { CompactEncrypt, SignJWT, compactDecrypt, jwtVerify } from 'jose';
 // Import winston types without conflicting with the Logger variable
 // eslint-disable-next-line no-unused-vars
 import winston from 'winston';
@@ -18,13 +17,13 @@ class AuthJwtMiddleware extends Middleware {
   /**
    * Description placeholder
    *
-   * @type {{ privateKey: CryptoKey; publicKey: CryptoKey; }}
+   * @type {Jws}
    */
   #jws;
   /**
    * Description placeholder
    *
-   * @type {{ privateKey: CryptoKey; publicKey: CryptoKey; }}
+   * @type {Jwe}
    */
   #jwe;
 
@@ -33,9 +32,8 @@ class AuthJwtMiddleware extends Middleware {
    *
    * @param {Object} options - Configuration options for authentication middleware.
    * @param {string} options.name - The name of issuer or mantaining the auth
-   * @param {{privateKey: CryptoKey, publicKey: CryptoKey}} options.jws - Keys used for signing JWT.
-   * @param {{privateKey: CryptoKey, publicKey: CryptoKey}} options.jwe - Keys used for encrypting JWT.
-   * @param {{ jws: string, jwe: string }} options.algorithms - Algorithm used for signing, verifying tokens (JWS) and (JWE) encryption, decryption payload.
+   * @param {Jws} options.jws - Keys used for signing JWT.
+   * @param {Jwe} options.jwe - Keys used for encrypting JWT.
    * @param {{path: string, method: string, role: string}[]} [options.protectedRoutes=[]] - List of routes that require authentication.
    * @param {Object} [options.roleHierarchy={}] - Hierarchy of roles for access control (e.g., { admin: ['editor', 'user'], editor: ['user'] }).
    */
@@ -43,10 +41,7 @@ class AuthJwtMiddleware extends Middleware {
     super();
     try {
       this.name = options.name || 'auth-jwt-middleware';
-      this.algorithms = options.algorithms || {
-        jws: 'EdDSA',
-        jwe: 'ECDH-ES+A256KW'
-      };
+
       this.protectedRoutes = options.protectedRoutes || [];
       this.#jws = options.jws;
       this.#jwe = options.jwe;
@@ -57,16 +52,6 @@ class AuthJwtMiddleware extends Middleware {
         editor: ['user'],
         user: []
       };
-
-      /**
-       * @type {TextEncoder}
-       */
-      this.encoder = new TextEncoder();
-
-      /**
-       * @type {TextDecoder}
-       */
-      this.decoder = new TextDecoder();
 
       /**
        * @type {winston.Logger}
@@ -82,67 +67,6 @@ class AuthJwtMiddleware extends Middleware {
       this.log.error(error);
       throw error;
     }
-  }
-
-  /**
-   * Generates a JWT token.
-   * @async
-   * @param {Object} payload - Data to be included in the token.
-   * @param {Object} [options] - JWT options (e.g., expiration time).
-   * @param {string} [options.expiresIn='5m'] - Token expiration time.
-   * @returns {Promise<string>} Generated JWT token.
-   */
-  async generateToken(payload, options = {}) {
-    return await new SignJWT(payload)
-      .setProtectedHeader({ alg: this.algorithms.jws })
-      .setIssuedAt()
-      .setIssuer(this.name)
-      .setExpirationTime(options.expiresIn || '5m')
-      .sign(this.#jws.privateKey);
-  }
-
-  /**
-   * Verifies a JWT token.
-   * @async
-   * @param {string} token - Token to verify.
-   * @returns {Promise<Object>} Decoded token payload.
-   * @throws {Error} If token is invalid or expired.
-   */
-  async verifyToken(token) {
-    return await jwtVerify(token, this.#jws.publicKey, {
-      algorithms: [this.algorithms.jws]
-    });
-  }
-
-  /**
-   * Encrypt the payload include sensitive data
-   *
-   * @async
-   * @param {Object} payload
-   * @returns {Promise<string>}
-   */
-  async encryptPayload(payload) {
-    return await new CompactEncrypt(
-      this.encoder.encode(JSON.stringify(payload))
-    )
-      .setProtectedHeader({ alg: this.algorithms.jwe, enc: 'A256GCM' })
-      .encrypt(this.#jwe.publicKey);
-  }
-
-  /**
-   * Description placeholder
-   *
-   * @async
-   * @param {string} encryptedPayload
-   * @returns {Promise<Object>}
-   * @throws {Error} - Error if the encryptedPayload invalid format
-   */
-  async decryptPayload(encryptedPayload) {
-    return JSON.parse(
-      this.decoder.decode(
-        (await compactDecrypt(encryptedPayload, this.#jwe.privateKey)).plaintext
-      )
-    );
   }
 
   /**
@@ -225,13 +149,11 @@ class AuthJwtMiddleware extends Middleware {
    * Registers the JWT authentication middleware in a Hapi server.
    *
    * @param {import('@hapi/hapi').Server} server - The Hapi server instance.
-   * @param {Object} options - Middleware options.
-   * @param {boolean} [options.setAsDefault=false] - If true, sets JWT authentication as the default.
    */
-  async register(server, options) {
+  async register(server) {
     // Register authentication scheme
     // eslint-disable-next-line
-    server.auth.scheme('authentication', (server, schemeOptions) => {
+    server.auth.scheme('jwt-auth', () => {
       return {
         authenticate: async (request, h) => {
           // Check if the current route requires authentication
@@ -263,10 +185,10 @@ class AuthJwtMiddleware extends Middleware {
 
             this.log.debug('Verifying token and validating payload');
             const token = authorization.split(' ')[1];
-            const { payload } = await this.verifyToken(token);
-
+            const payloadEncrypted = await this.#jws.verifyToken(token);
+            const payload = await this.#jwe.decryptPayload(payloadEncrypted);
             // Validate token
-            if (!payload || !payload?.userId) {
+            if (!payload || !payload?.id) {
               this.log.warn(
                 `Invalid token payload for request to ${request.path}`
               );
@@ -275,7 +197,7 @@ class AuthJwtMiddleware extends Middleware {
 
             const user = await this.model.findFirstOrThrow({
               where: {
-                id: payload?.userId
+                id: payload?.id
               },
               select: {
                 id: true,
@@ -305,7 +227,7 @@ class AuthJwtMiddleware extends Middleware {
             }
 
             this.log.info(
-              `Authentication successful for user ID: ${payload.userId}`
+              `Authentication successful for user ID: ${payload.id}`
             );
 
             // Set credentials that will be available in request.auth.credentials
@@ -328,6 +250,9 @@ class AuthJwtMiddleware extends Middleware {
         }
       };
     });
+
+    // Register default auth strategy
+    server.auth.strategy('jwt', 'jwt-auth')
 
     // Register RBAC plugin for role-based authorization
     await server.register({
@@ -376,14 +301,7 @@ class AuthJwtMiddleware extends Middleware {
       }
     });
 
-    // Register default auth strategy
-    server.auth.strategy('authentication', 'authentication');
-
-    // Option to enable auth by default on all routes
-    if (options.setAsDefault) {
-      this.log.info('Setting JWT authentication as default for all routes');
-      server.auth.default('authentication');
-    }
+;
   }
 }
 
