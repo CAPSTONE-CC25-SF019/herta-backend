@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { createSoftDeleteMiddleware } from 'prisma-soft-delete-middleware';
 
 /**
  * Singleton PrismaClient instance
@@ -16,6 +17,20 @@ const getPrismaInstance = () => {
   }
   return prismaInstance;
 };
+
+getPrismaInstance().$use(
+  createSoftDeleteMiddleware({
+    models: {
+      User: {
+        field: 'deletedAt',
+        createValue: (deleted) => {
+          if (deleted) return new Date();
+          return null;
+        }
+      }
+    }
+  })
+);
 
 const models = {
   /**
@@ -44,9 +59,9 @@ const models = {
   SymptomsOnDiagnoses: getPrismaInstance().symptomsOnDiagnoses,
 
   /**
-   * Health Record Model
+   * Symptoms On Diseases Model
    */
-  HealthRecord: getPrismaInstance().healthRecord
+  SymptomsOnDiseases: getPrismaInstance().symptomsOnDiseases
 };
 
 export default models;
