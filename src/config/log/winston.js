@@ -32,7 +32,11 @@ class LoggerSingleton {
               ),
         transports:
           process.env.LOG_OUTPUT === 'console'
-            ? [new winston.transports.Console()]
+            ? [
+                new winston.transports.Console({
+                  format: winston.format.simple()
+                })
+              ]
             : [
                 new winston.transports.DailyRotateFile({
                   filename: 'app-%DATE%.log',
