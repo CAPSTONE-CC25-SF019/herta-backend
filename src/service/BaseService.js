@@ -110,7 +110,7 @@ export default class BaseService {
    * Handle Prisma and other errors
    * @param {Error} error - Error to handle
    * @throws {ErrorService} - Transformed error
-   * @private
+   *
    */
   handleError(error) {
     // If it's already an ErrorService, just rethrow it
@@ -135,7 +135,7 @@ export default class BaseService {
 
       // Record not found
       if (error.code === 'P2025') {
-        throw ErrorService.notFound(this.entityName, 'provided ID');
+        throw ErrorService.notFound(this.entityName, error?.cause);
       }
     }
 
