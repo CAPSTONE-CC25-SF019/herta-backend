@@ -18,7 +18,7 @@ export default class MachineLearningAPI {
           some: {
             symptom: {
               name: {
-                in: data.symptoms,
+                in: data.symptoms
               }
             }
           }
@@ -35,7 +35,7 @@ export default class MachineLearningAPI {
             }
           }
         }
-      },
+      }
     });
   }
 }
