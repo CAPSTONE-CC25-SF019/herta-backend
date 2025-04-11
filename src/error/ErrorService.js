@@ -16,53 +16,76 @@ export default class ErrorService extends Error {
   code;
 
   /**
-   * @param {string} message - Error message
-   * @param {number} status - HTTP status code
-   * @param {string} code - Error code description
+   * @param {{
+   *   title: string,
+   *   message: string,
+   *   status: number,
+   *   code: string
+   * }} errorObject
    */
-  constructor(message, status, code) {
-    super(message);
+  constructor(errorObject) {
+    super(errorObject?.message);
     this.name = 'ErrorService';
-    this.status = status;
-    this.code = code;
+    this.title = errorObject?.title;
+    this.status = errorObject?.status;
+    this.code = errorObject?.code;
   }
 
   /**
    * Create a not found error
-   * @param {string} entity - Entity name that was not found
-   * @param {string|number} id - Entity ID that was not found
+   * @param {{
+   *   entityName: string,
+   *   fieldName: string,
+   *   fieldValue: any,
+   * }} errorObject
    * @returns {ErrorService}
    */
-  static notFound(entity, id) {
-    return new ErrorService(
-      `${entity} with id ${id} not found`,
-      404,
-      'NOT_FOUND'
-    );
+  static notFound(errorObject) {
+    return new ErrorService({
+      title: `${errorObject.entityName.toUpperCase()}_NOT_FOUND`,
+      message: `${errorObject.entityName} field ${errorObject.fieldName} not found with value ${errorObject.fieldValue}`,
+      status: 404,
+      code: 'NOT_FOUND'
+    });
   }
 
   /**
    * Create a conflict error
+   * @param {{
+   *   entityName: string,
+   *   fieldName: string,
+   *   fieldValue: any
+   * }} errorObject - error object
    * @param {string} entity - Entity name
    * @param {string} field - Field that caused the conflict
    * @param {string|number} value - Value that caused the conflict
    * @returns {ErrorService}
    */
-  static conflict(entity, field, value) {
-    return new ErrorService(
-      `${entity} with ${field} ${value} already exists`,
-      409,
-      'CONFLICT'
-    );
+  static conflict(errorObject) {
+    return new ErrorService({
+      title: `${errorObject.entityName.toUpperCase()}_CONFLICT`,
+      message: `${errorObject.entityName} have conflicts in ${errorObject?.fieldName} ${errorObject.fieldValue ? 'with value' + errorObject.fieldValue : ''}`,
+      status: 409,
+      code: 'CONFLICT'
+    });
   }
 
   /**
    * Create a validation error
+   * @param {{
+   *   entityName: string,
+   *   message: string
+   * }} errorObject
    * @param {string} message - Validation error message
    * @returns {ErrorService}
    */
-  static validation(message) {
-    return new ErrorService(message, 400, 'VALIDATION_ERROR');
+  static validation(errorObject) {
+    return new ErrorService({
+      title: `${errorObject.entityName.toUpperCase()}_VALIDATION_ERROR`,
+      message: errorObject.message,
+      status: 400,
+      code: 'VALIDATION_ERROR'
+    });
   }
 
   /**
@@ -71,28 +94,45 @@ export default class ErrorService extends Error {
    * @returns {ErrorService}
    */
   static server(message) {
-    return new ErrorService(
-      message || 'Internal server error',
-      500,
-      'SERVER_ERROR'
-    );
+    return new ErrorService({
+      title: 'INTERNAL_SERVER_ERROR',
+      message: `${message}`,
+      status: 500,
+      code: 'INTERNAL_SERVER_ERROR'
+    });
   }
 
   /**
    * Create an unauthorized error
-   * @param {Error} message - Error message
+   * @param {{
+   *   entityName: string,
+   *   message: string
+   * }} errorObject
    * @returns {ErrorService}
    */
-  static unauthorized(message) {
-    return new ErrorService(message || 'Unauthorized', 401, 'UNAUTHORIZED');
+  static unauthorized(errorObject) {
+    return new ErrorService({
+      title: `${errorObject.entityName.toUpperCase()}_UNAUTHORIZED`,
+      message: errorObject.message,
+      status: 401,
+      code: 'UNAUTHORIZED'
+    });
   }
 
   /**
    * Create a forbidden error
-   * @param {string} message - Error message
+   * @param {{
+   *   entityName: string,
+   *   message: string
+   * }} errorObject
    * @returns {ErrorService}
    */
-  static forbidden(message) {
-    return new ErrorService(message || 'Forbidden', 403, 'FORBIDDEN');
+  static forbidden(errorObject) {
+    return new ErrorService({
+      title: `${errorObject.entityName.toUpperCase()}_FORBIDDEN`,
+      message: errorObject.message,
+      status: 403,
+      code: 'FORBIDDEN'
+    });
   }
 }
