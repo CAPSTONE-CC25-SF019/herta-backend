@@ -98,7 +98,7 @@ export default class UsersRepository extends BaseRepositoryImpl {
    * @returns {Promise<Object>}
    */
   async getByEmail(email) {
-    return this.user.findFirstOrThrow({
+    return this.user.findFirst({
       where: {
         email
       },

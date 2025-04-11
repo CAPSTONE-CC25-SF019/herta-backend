@@ -72,27 +72,30 @@ export default class UsersService extends BaseService {
 
   /**
    * Get All Users with Standard Pagination
-   * @param options {{pagination: {page: number, limit: number}}}
+   * @param {Object} options - Pagination options
+   * @param {Object} options.pagination - Pagination parameters
+   * @param {number} options.pagination.page - Current page number
+   * @param {number} options.pagination.limit - Items per page
    * @return {Promise<Object>} - Return object with users and pagination info
    * @throws {ErrorService}
    */
   async getAllWithPagination(options) {
-    const page = options.pagination.page ?? 1;
-    const limit = options.pagination.limit ?? 10;
+    const page = options.pagination?.page ?? 1;
+    const limit = options.pagination?.limit ?? 10;
 
     this.log.info(
       `Getting users with standard pagination, page: ${page}, limit: ${limit}`
     );
 
     try {
-      const offset = (page - 1) * limit;
+      const skip = (page - 1) * limit;
 
       const [users, totalCount] = await Promise.all([
-        this.usersRepository.getAllWithPagination({
-          skip: offset,
+        this.user.findMany({
+          skip,
           take: limit
         }),
-        this.usersRepository.count()
+        this.user.count()
       ]);
 
       const totalPages = Math.ceil(totalCount / limit);
@@ -105,7 +108,7 @@ export default class UsersService extends BaseService {
         data: users,
         pagination: {
           currentPage: page,
-          totalPages: totalPages,
+          totalPages,
           totalItems: totalCount,
           itemsPerPage: limit,
           hasNextPage: page < totalPages,
@@ -116,7 +119,7 @@ export default class UsersService extends BaseService {
       this.log.error(
         `Error retrieving users with pagination: ${error.message}`
       );
-      return this.handleError(error);
+      throw this.handleError(error);
     }
   }
 

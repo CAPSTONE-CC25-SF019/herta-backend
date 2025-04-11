@@ -1,8 +1,14 @@
 import BaseRepositoryImpl from './BaseRepositoryImpl.js';
 import models from '../model/models.js';
 
-
+/**
+ * Repository class for symptom-related database operations
+ * @extends BaseRepositoryImpl
+ */
 export default class SymptomRepository extends BaseRepositoryImpl {
+  /**
+   * Creates a new instance of SymptomRepository
+   */
   constructor() {
     super(models.Symptom);
     this.symptom = models.Symptom;
@@ -11,10 +17,12 @@ export default class SymptomRepository extends BaseRepositoryImpl {
   }
 
   /**
-   *
-   * @param name {string}
-   * @param options {{diagnoses: boolean,diseases: boolean}}
-   * @returns {Promise<Prisma.Prisma__SymptomClient<GetResult<Prisma.$SymptomPayload<DefaultArgs>, {where: {name}}, "findFirstOrThrow", Prisma.PrismaClientOptions>, never, DefaultArgs, Prisma.PrismaClientOptions>>}
+   * Get a symptom by its name
+   * @param {string} name - The name of the symptom to find
+   * @param {Object} options - Include options
+   * @param {boolean} [options.diagnoses] - Whether to include related diagnoses
+   * @param {boolean} [options.diseases] - Whether to include related diseases
+   * @returns {Promise<Object>} The symptom object or throws if not found
    */
   async getSymptomsByName(name, options) {
     const args = {
@@ -23,13 +31,13 @@ export default class SymptomRepository extends BaseRepositoryImpl {
       }
     }
     if ( options ) args.include = options;
-    return this.symptom.findFirstOrThrow(args);
+    return this.symptom.findFirst(args);
   }
 
   /**
-   *
-   * @param diagnosisId {string}
-   * @returns {PrismaPromise<GetFindResult<Prisma.$SymptomPayload<DefaultArgs>, {where: {diagnoses: {some: {diagnosisId}}}, include: {diagnoses: boolean}}, Prisma.PrismaClientOptions>[]>}
+   * Get all symptoms associated with a specific diagnosis
+   * @param {string} diagnosisId - The unique identifier of the diagnosis
+   * @returns {Promise<Array>} Array of symptom objects associated with the diagnosis
    */
   async getAllSymptomsByDiagnosisId(diagnosisId) {
     return this.symptom.findMany({
@@ -47,9 +55,9 @@ export default class SymptomRepository extends BaseRepositoryImpl {
   }
 
   /**
-   *
-   * @param diseaseId {string}
-   * @returns {PrismaPromise<GetFindResult<Prisma.$SymptomPayload<DefaultArgs>, {where: {diseases: {some: {diseaseId}}}, include: {diseases: boolean}}, Prisma.PrismaClientOptions>[]>}
+   * Get all symptoms associated with a specific disease
+   * @param {string} diseaseId - The unique identifier of the disease
+   * @returns {Promise<Array>} Array of symptom objects associated with the disease
    */
   async getAllSymptomsByDiseaseId(diseaseId) {
     return this.symptom.findMany({
@@ -66,10 +74,15 @@ export default class SymptomRepository extends BaseRepositoryImpl {
     });
   }
 
-  async getSymptomsById(symptoId) {
+  /**
+   * Get a symptom by its ID with related diagnoses and diseases
+   * @param {string} symptomId - The unique identifier of the symptom
+   * @returns {Promise<Object|null>} The symptom object with relations if found, null otherwise
+   */
+  async getSymptomsById(symptomId) {
     return this.symptom.findFirst({
       where: {
-        id: symptoId
+        id: symptomId
       },
       include: {
         diseases: true,
@@ -77,27 +90,4 @@ export default class SymptomRepository extends BaseRepositoryImpl {
       }
     });
   }
-
-  // async getDiagnosisBySymptom(symptom) {
-  //   return this.diagnosis.findMany({
-  //     where: {
-  //       symptom: {
-  //         name: symptom,
-  //       }
-  //     }
-  //   });
-  // }
-  // async getDiagnosisBySymptomIds(symptoms) {
-  //   return this.diagnosis.findMany({
-  //     where: {
-  //       symptom: {
-  //         some: {
-  //           in: {
-  //             name: symptoms,
-  //           }
-  //         }
-  //       }
-  //     }
-  //   })
-  // }
 };
