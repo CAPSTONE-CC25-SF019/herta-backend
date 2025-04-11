@@ -174,6 +174,11 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
     };
   }
 
+  /**
+   * Retrieves diagnoses that contain all of the specified symptoms
+   * @param {Array<string>} symptoms - Array of symptom identifiers to match
+   * @returns {Promise<Array>} Array of diagnosis objects that include all specified symptoms
+   */
   async getDiagnosesBySymptoms(symptoms) {
     return this.diagnoses.findMany({
       where: {
@@ -192,6 +197,11 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
     });
   }
 
+  /**
+   * Retrieves all diagnoses for a specific disease
+   * @param {string} diseaseId - The unique identifier of the disease
+   * @returns {Promise<Array>} Array of diagnosis objects associated with the disease
+   */
   async getDiagnosesByDiseaseId(diseaseId) {
     return this.diagnoses.findMany({
       where: {
@@ -204,6 +214,11 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
     });
   }
 
+  /**
+   * Retrieves all diagnoses for a specific user
+   * @param {string} userId - The unique identifier of the user
+   * @returns {Promise<Array>} Array of diagnosis objects associated with the user
+   */
   async getDiagnosesByUserId(userId) {
     return this.diagnoses.findMany({
       where: {
@@ -215,6 +230,5 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
       }
     });
   }
-
 
 }
