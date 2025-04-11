@@ -2,29 +2,28 @@
 import DiagnosesService from '../service/DiagnosesService.js';
 import BaseController from './BaseController.js';
 
-
-
-
-
 export default class DiagnosesController extends BaseController {
   /**
-   * 
+   *
    * @param diagnosesService {DiagnosesService}
    */
   constructor(diagnosesService) {
-    super(
-      diagnosesService.log
-    );
+    super(diagnosesService.log);
     this.diagnosesService = diagnosesService;
   }
-  
+
   async create(request, h) {
     try {
       const credential = request.auth.credentials;
-      this.log.info(`Request received to create diagnose with id ${credential?.id}`);
-      
+      this.log.info(
+        `Request received to create diagnose with id ${credential?.id}`
+      );
+
       const { symptomNames } = request.payload;
-      const { data } = await this.diagnosesService.create({ credential, symptomNames});
+      const { data } = await this.diagnosesService.create({
+        credential,
+        symptomNames
+      });
       this.log.info(`Successfully Create diagnose with id ${data?.id}`);
       return this.createResponse({
         hapiResponse: h,
@@ -36,24 +35,31 @@ export default class DiagnosesController extends BaseController {
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when creating diagnose cause ${err?.message}`);
+      this.log.error(
+        `Getting error when creating diagnose cause ${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
         messageInternalServer: `an unexpected error occurred during create the diagnose.\n${err?.message}.`
-      })
+      });
     }
   }
 
   async update(request, h) {
     try {
       const credential = request.auth.credentials;
-      this.log.info(`Request received to update diagnose with id ${credential?.id}`);
+      this.log.info(
+        `Request received to update diagnose with id ${credential?.id}`
+      );
 
       // Destructuring input from client
       const { id } = request.params;
       const { symptomNames } = request.payload;
-      const { data } = await this.diagnosesService.update({ userId: credential?.id, id }, symptomNames);
+      const { data } = await this.diagnosesService.update(
+        { userId: credential?.id, id },
+        symptomNames
+      );
       this.log.info(`Successfully Update diagnose with id ${id}`);
 
       return this.createResponse({
@@ -62,61 +68,70 @@ export default class DiagnosesController extends BaseController {
           title: 'SUCCESSFULLY_UPDATE_DIAGNOSE',
           data,
           status: 200,
-          code: 'STATUS_OK',
+          code: 'STATUS_OK'
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when updating diagnose cause ${err?.message}`);
+      this.log.error(
+        `Getting error when updating diagnose cause ${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
         messageInternalServer: `an unexpected error occurred during update the diagnose.\n${err?.message}.`
-      })
+      });
     }
   }
 
   async delete(request, h) {
     try {
       const credential = request.auth.credentials;
-      this.log.info(`Request received to update diagnose with id ${credential?.id}`);
+      this.log.info(
+        `Request received to update diagnose with id ${credential?.id}`
+      );
 
       // Destructuring input from client
       const { id } = request.params;
       await this.diagnosesService.delete({ userId: credential?.id, id });
-      this.log.info(`Successfully delete diagnose with id ${JSON.stringify(id)}`);
+      this.log.info(
+        `Successfully delete diagnose with id ${JSON.stringify(id)}`
+      );
 
       return this.createResponse({
         hapiResponse: h,
         response: {
           title: 'SUCCESSFULLY_DELETE_DIAGNOSE',
           data: {
-            message: `Successfully deleted diagnose with id: ${id}`,
+            message: `Successfully deleted diagnose with id: ${id}`
           },
           status: 200,
-          code: 'STATUS_OK',
+          code: 'STATUS_OK'
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when deleting diagnose cause ${err?.message}`);
+      this.log.error(
+        `Getting error when deleting diagnose cause ${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
         messageInternalServer: `an unexpected error occurred during delete the diagnose.\n${err?.message}.`
-      })
+      });
     }
   }
-  
+
   async getAll(request, h) {
     try {
       this.log.info(`Request received to get all diagnose`);
-      
+
       const { page, size } = await request.query;
       this.log.info(`Processing Get all diagnose ${page} of ${size}`);
-      
-      const { data, pagination } = await this.diagnosesService.getAllWithPagination({
-        page,
-        size
-      });
+
+      const { data, pagination } =
+        await this.diagnosesService.getAllWithPagination({
+          page,
+          size
+        });
 
       this.log.info(`Successfully Get all diagnose ${page} of ${size}`);
 
@@ -133,12 +148,14 @@ export default class DiagnosesController extends BaseController {
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when request all diagnose.\n${err?.message}`);
+      this.log.error(
+        `Getting error when request all diagnose.\n${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
         messageInternalServer: `an unexpected error occurred during getting all diagnose.\n${err?.message}.`
-      })
+      });
     }
   }
 
@@ -146,7 +163,9 @@ export default class DiagnosesController extends BaseController {
     try {
       // Getting user id from credentials
       const { id } = request.auth.credentials;
-      this.log.info(`Request received to get statistics diagnose with users id ${id}`);
+      this.log.info(
+        `Request received to get statistics diagnose with users id ${id}`
+      );
       this.log.info(`Processing Get statistics diagnose with users id ${id}`);
 
       const { data } = await this.diagnosesService.getStatistics(id);
@@ -158,11 +177,13 @@ export default class DiagnosesController extends BaseController {
           title: 'SUCCESSFULLY_GET_DIAGNOSE_STATISTICS',
           data,
           status: 200,
-          code: 'STATUS_OK',
+          code: 'STATUS_OK'
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when getting statistics diagnose with users id.\n${err?.message}`);
+      this.log.error(
+        `Getting error when getting statistics diagnose with users id.\n${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
@@ -175,7 +196,9 @@ export default class DiagnosesController extends BaseController {
     try {
       // Getting User ID
       const { id } = request.params;
-      this.log.info(`Request received to get statistics diagnose with users id ${id}`);
+      this.log.info(
+        `Request received to get statistics diagnose with users id ${id}`
+      );
       this.log.info(`Processing Get statistics diagnose with users id ${id}`);
 
       const { data } = await this.diagnosesService.getStatistics(id);
@@ -187,11 +210,13 @@ export default class DiagnosesController extends BaseController {
           title: 'SUCCESSFULLY_GET_DIAGNOSE_STATISTICS',
           data,
           status: 200,
-          code: 'STATUS_OK',
+          code: 'STATUS_OK'
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when getting statistics diagnose with users id.\n${err?.message}`);
+      this.log.error(
+        `Getting error when getting statistics diagnose with users id.\n${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
@@ -216,11 +241,13 @@ export default class DiagnosesController extends BaseController {
           title: 'SUCCESSFULLY_GET_DIAGNOSE_BY_SYMPTOMS',
           data,
           status: 200,
-          code: 'STATUS_OK',
+          code: 'STATUS_OK'
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when getting diagnoses with symptoms.\n${err?.message}`);
+      this.log.error(
+        `Getting error when getting diagnoses with symptoms.\n${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
@@ -238,7 +265,10 @@ export default class DiagnosesController extends BaseController {
       this.log.info(`Request received to get diagnoses with symptoms`);
       // Processing Get Diagnose
       this.log.info(`Processing Get Diagnose with Symptoms`);
-      const { data } = await this.diagnosesService.getBySymptomsAndUserId({ userId: credentials?.id, symptoms: names});
+      const { data } = await this.diagnosesService.getBySymptomsAndUserId({
+        userId: credentials?.id,
+        symptoms: names
+      });
       this.log.info(`Successfully Get Diagnose with Symptoms`);
 
       // return response
@@ -248,11 +278,13 @@ export default class DiagnosesController extends BaseController {
           title: 'SUCCESSFULLY_GET_DIAGNOSE_BY_SYMPTOMS',
           data,
           status: 200,
-          code: 'STATUS_OK',
+          code: 'STATUS_OK'
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when getting diagnoses with symptoms.\n${err?.message}`);
+      this.log.error(
+        `Getting error when getting diagnoses with symptoms.\n${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
@@ -260,7 +292,6 @@ export default class DiagnosesController extends BaseController {
       });
     }
   }
-
 
   async getByDiseaseId(request, h) {
     try {
@@ -279,15 +310,17 @@ export default class DiagnosesController extends BaseController {
           title: 'SUCCESSFULLY_GET_DIAGNOSE_BY_DISEASE_ID',
           data,
           status: 200,
-          code: 'STATUS_OK',
+          code: 'STATUS_OK'
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when getting diagnoses with disease id.\n${err?.message}`);
+      this.log.error(
+        `Getting error when getting diagnoses with disease id.\n${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
-        messageInternalServer: `an unexpected error when occurred during getting diagnoses with disease id.\n${err?.message}.`,
+        messageInternalServer: `an unexpected error when occurred during getting diagnoses with disease id.\n${err?.message}.`
       });
     }
   }
@@ -302,7 +335,10 @@ export default class DiagnosesController extends BaseController {
       this.log.info(`Request received to get diagnoses with disease id`);
       this.log.info(`Processing Get Diagnose with Symptoms`);
 
-      const { data } = await this.diagnosesService.getByDiseaseIdAndUserId({ diseaseId: id, userId: credentials?.id});
+      const { data } = await this.diagnosesService.getByDiseaseIdAndUserId({
+        diseaseId: id,
+        userId: credentials?.id
+      });
       this.log.info(`Successfully Get Diagnose with Symptoms`);
 
       return this.createResponse({
@@ -311,15 +347,17 @@ export default class DiagnosesController extends BaseController {
           title: 'SUCCESSFULLY_GET_DIAGNOSE_BY_DISEASE_ID',
           data,
           status: 200,
-          code: 'STATUS_OK',
+          code: 'STATUS_OK'
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when getting diagnoses with disease id.\n${err?.message}`);
+      this.log.error(
+        `Getting error when getting diagnoses with disease id.\n${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
-        messageInternalServer: `an unexpected error when occurred during getting diagnoses with disease id.\n${err?.message}.`,
+        messageInternalServer: `an unexpected error when occurred during getting diagnoses with disease id.\n${err?.message}.`
       });
     }
   }
@@ -329,7 +367,7 @@ export default class DiagnosesController extends BaseController {
       // Getting credentials
       const credentials = request.auth.credentials;
 
-      this.log.info(`Request received to get diagnose by credentials`)
+      this.log.info(`Request received to get diagnose by credentials`);
       this.log.info(`Processing Get Diagnose with Credentials`);
 
       const { data } = await this.diagnosesService.getByUserId(credentials?.id);
@@ -341,15 +379,17 @@ export default class DiagnosesController extends BaseController {
           title: 'SUCCESSFULLY_GET_DIAGNOSE_DETAIL',
           data,
           status: 200,
-          code: 'STATUS_OK',
+          code: 'STATUS_OK'
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when get diagnose by credentials.\n${err?.message}`);
+      this.log.error(
+        `Getting error when get diagnose by credentials.\n${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
-        messageInternalServer: `an unexpected error when occurred during getting diagnose by credentials.\n${err?.message}.`,
+        messageInternalServer: `an unexpected error when occurred during getting diagnose by credentials.\n${err?.message}.`
       });
     }
   }
@@ -371,15 +411,17 @@ export default class DiagnosesController extends BaseController {
           title: 'SUCCESSFULLY_GET_DIAGNOSE_DETAIL',
           data,
           status: 200,
-          code: 'STATUS_OK',
+          code: 'STATUS_OK'
         }
       });
     } catch (err) {
-      this.log.error(`Getting error when get diagnose by users id.\n${err?.message}`);
+      this.log.error(
+        `Getting error when get diagnose by users id.\n${err?.message}`
+      );
       return this.handleError({
         hapiResponse: h,
         error: err,
-        messageInternalServer: `an unexpected error when occurred during getting diagnose by users id.\n${err?.message}.`,
+        messageInternalServer: `an unexpected error when occurred during getting diagnose by users id.\n${err?.message}.`
       });
     }
   }
