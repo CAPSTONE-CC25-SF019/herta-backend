@@ -1,16 +1,17 @@
-// eslint-disable-next-line no-unused-vars
 import { Prisma } from '@prisma/client';
 
 // eslint-disable-next-line no-unused-vars
-import Hash from '../config/hash/bcrypt.js';
+// import Hash from '../config/hash/bcrypt.js';
 // eslint-disable-next-line no-unused-vars
-import Jwe from '../config/jwt/jwe.js';
+// import Jwe from '../config/jwt/jwe.js';
 // eslint-disable-next-line no-unused-vars
 import Jws from '../config/jwt/jws.js';
+
 import ErrorService from '../error/ErrorService.js';
 import ProfilesRepository from '../repository/ProfilesRepository.js';
 import UsersRepository from '../repository/UsersRepository.js';
 import BaseService from './BaseService.js';
+
 
 export default class UsersService extends BaseService {
   /**
@@ -183,3 +184,6 @@ export default class UsersService extends BaseService {
     }
   }
 }
+
+
+
