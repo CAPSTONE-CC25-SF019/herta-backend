@@ -1,4 +1,4 @@
-// eslint-disable-next-line
+ 
 import Boom from '@hapi/boom';
 
 import BaseController from './BaseController.js';
