@@ -5,7 +5,6 @@ import process from 'node:process';
 import Routes from './routes/routes.js';
 import UsersRoutes from './routes/users.routes.js';
 
-
 /**
  * Function init for initialize api
  * @param {String} host  the host location api
