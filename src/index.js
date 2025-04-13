@@ -4,8 +4,10 @@ import Vision from '@hapi/vision';
 import HapiSwagger from 'hapi-swagger';
 import Joi from 'joi';
 import process from 'node:process';
+
 import Routes from './routes/routes.js';
 import statusToCode from './utils/statusToCode.js';
+
 /**
  * Function init for initialize api
  * @param {String} host  the host location api
@@ -28,7 +30,7 @@ const init = async (host, port) => {
     const swaggerOptions = {
       info: {
         title: 'Herta API Documentation',
-        version: process.env.API_VERSION,
+        version: process.env.API_VERSION
       },
       securityDefinitions: {
         Bearer: {
@@ -36,7 +38,7 @@ const init = async (host, port) => {
           name: 'Authorization',
           in: 'header'
         }
-      },
+      }
     };
 
     await server.register([
