@@ -19,20 +19,24 @@ RUN npm ci  && \
 
 COPY --chown=${username}:${username} . .
 
-RUN npm run db:generate \
-    && npm run cert:jwe \
-    && npm run cert:jws:auth \
-    && npm run cert:jws:fp 
 
 
-FROM gcr.io/distroless/nodejs22-debian12
+FROM node:23-alpine AS final
 
 ARG username="appuser"
 
 # TODO: Include All ENV 
-ENV DATABASE_URL="" \
-    LOG_LEVEL="info" \
-    LOG_OUTPUT="console"
+ENV ML_API_BASE_URL="" \
+    FRONT_END_BASE_URL="" \
+    DATABASE_URL="" \
+    LOG_LEVEL="" \
+    LOG_OUTPUT="" \
+    REFRESH_TOKEN_EXPIRE="" \
+    ACCESS_TOKEN_EXPIRE="" \
+    JWT_AUTH_NAME="" \
+    HASH_SALT="" \
+    HASH_SECRET_KEY="" \
+    API_VERSION=""
 
 WORKDIR /app
 
@@ -43,6 +47,12 @@ USER root
 
 COPY --chown=${username}:${username} --from=build /app .
 
+RUN npm run db:generate \
+    && npm run cert:jwe \
+    && npm run cert:jws:auth \
+    && npm run cert:jws:fp
+
 USER ${username}:${username}
 
-CMD [ "src/index.js" ]
+ENTRYPOINT ["npm"]
+CMD [ "run", "start:dev"]
