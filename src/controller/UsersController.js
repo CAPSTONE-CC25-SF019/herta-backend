@@ -1,3 +1,4 @@
+ 
 import Boom from '@hapi/boom';
 
 import BaseController from './BaseController.js';
@@ -5,15 +6,47 @@ import BaseController from './BaseController.js';
 class UsersController extends BaseController {
   /**
    * @param usersService {UsersService}
-   * @param validation {Joi.schema}
    */
-  constructor(usersService, validation) {
+  constructor(usersService) {
     super(usersService.log);
     this.usersService = usersService;
-    this.validation = validation;
   }
 
-  async getAllUsers(request, h) {
+  async getDetail(request, h) {
+    this.log.info('Getting users by authentication...');
+    try {
+      // Get current user's email from authentication
+      const credential = request.auth.credentials;
+      // Getting Users by Email
+      this.log.info(
+        `Getting users by authentication email: ${credential?.email}`
+      );
+      const { data } = await this.usersService.getByEmail({
+        email: credential?.email
+      });
+      this.log.info(
+        `Successfully get users by authentication email: ${credential.email}`
+      );
+      return this.createResponse({
+        hapiResponse: h,
+        response: {
+          title: 'SUCCESSFULLY_GET_ALL_USERS',
+          data,
+          status: 200,
+          code: 'STATUS_OK'
+        }
+      });
+    } catch (err) {
+      this.log.error(`Getting users by authentication failed: ${err}`);
+      return this.handleError({
+        hapiResponse: h,
+        error: err,
+        messageInternalServer: `An unexpected error occurred during get user.\n${err.message}`
+      });
+    }
+  }
+
+  async getAllByCursorPagination(request, h) {
     this.log.info('Getting all users');
     try {
       if (!request.hasRoleAccess(request.auth.credentials?.role, 'ADMIN')) {
@@ -32,28 +65,8 @@ class UsersController extends BaseController {
         throw errResponse;
       }
 
-      const queryParams = request.query;
-      const { error, value } =
-        this.validation.cursorPaginate.validate(queryParams);
-
-      if (error) {
-        this.log.warn(`Validation error in getAllUsers: ${error.message}`);
-        return this.baseResponse({
-          hapiResponse: h,
-          payload: {
-            errors: error.details.map((detail) => ({
-              title: 'USERS_VALIDATION_ERROR',
-              detail: detail.message,
-              status: 400,
-              code: 'VALIDATION_ERROR'
-            }))
-          },
-          statusCode: 400
-        });
-      }
-
       const data = await this.usersService.getAll({
-        pagination: value
+        pagination: request.query
       });
 
       this.log.info('Successfully retrieved all users');
@@ -71,6 +84,45 @@ class UsersController extends BaseController {
         hapiResponse: h,
         error: err,
         messageInternalServer: `An unexpected error occurred during get all users.\n${err.message}`
+      });
+    }
+  }
+
+  async getAllByPagination(request, h) {
+    try {
+      this.log.info(
+        `Retrieve request with pagination: ${JSON.stringify(request.query)}`
+      );
+      const { page, size } = request.query;
+      const { data, pagination } = await this.usersService.getAllWithPagination(
+        {
+          pagination: {
+            page,
+            size
+          }
+        }
+      );
+      this.log.info(
+        `Successfully retrieved all users by pagination: ${JSON.stringify(request.query)}`
+      );
+      return this.createResponse({
+        hapiResponse: h,
+        response: {
+          title: 'SUCCESSFULLY_GET_ALL_USERS_BY_PAGINATION',
+          data,
+          status: 200,
+          code: 'STATUS_OK',
+          meta: {
+            pagination
+          }
+        }
+      });
+    } catch (err) {
+      this.log.error(`Error when users by pagination: ${err?.message}`);
+      return this.handleError({
+        hapiResponse: h,
+        error: err,
+        messageInternalServer: `An unexpected error occurred during get users by pagination.\n${err?.message}`
       });
     }
   }
@@ -125,30 +177,10 @@ class UsersController extends BaseController {
   async register(request, h) {
     this.log.info('Processing user registration');
     try {
-      // Validate request payload
-      const { error, value } = this.validation.register.validate(
-        request.payload
-      );
-      if (error) {
-        this.log.warn(`Validation error in register: ${error.message}`);
-        return this.baseResponse({
-          hapiResponse: h,
-          payload: {
-            errors: error.details.map((detail) => ({
-              title: 'USERS_VALIDATION_ERROR',
-              detail: detail.message,
-              status: 400,
-              code: 'VALIDATION_ERROR'
-            }))
-          },
-          statusCode: 400
-        });
-      }
-
       // Register user
-      await this.usersService.register(value);
+      await this.usersService.register(request.payload);
 
-      this.log.info(`User registered successfully: ${value.email}`);
+      this.log.info(`User registered successfully: ${request.payload.email}`);
       return this.createResponse({
         hapiResponse: h,
         response: {
@@ -176,29 +208,12 @@ class UsersController extends BaseController {
   async login(request, h) {
     this.log.info('Processing user login');
     try {
-      // Validate request payload
-      const { error, value } = this.validation.login.validate(request.payload);
-
-      if (error) {
-        this.log.warn(`Validation error in login: ${error.message}`);
-        return this.baseResponse({
-          hapiResponse: h,
-          payload: {
-            errors: error.details.map((detail) => ({
-              title: 'USERS_VALIDATION_ERROR',
-              detail: detail.message,
-              status: 400,
-              code: 'VALIDATION_ERROR'
-            }))
-          },
-          statusCode: 400
-        });
-      }
-
       // Perform login
-      const tokens = await this.usersService.login({ payload: value });
+      const tokens = await this.usersService.login({
+        payload: request.payload
+      });
 
-      this.log.info(`User logged in successfully: ${value.email}`);
+      this.log.info(`User logged in successfully: ${request.payload.email}`);
 
       // Create response
       const response = this.createResponse({
@@ -218,7 +233,7 @@ class UsersController extends BaseController {
         path: '/',
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        sameSite: 'none'
       });
 
       return response;
@@ -240,32 +255,13 @@ class UsersController extends BaseController {
   async update(request, h) {
     this.log.info('Processing user update');
     try {
-      // Validate request payload
-      const { error, value } = this.validation.update.validate(request.payload);
-
-      if (error) {
-        this.log.warn(`Validation error in update: ${error.message}`);
-        return this.baseResponse({
-          hapiResponse: h,
-          payload: {
-            errors: error.details.map((detail) => ({
-              title: 'USERS_VALIDATION_ERROR',
-              detail: detail.message,
-              status: 400,
-              code: 'VALIDATION_ERROR'
-            }))
-          },
-          statusCode: 400
-        });
-      }
-
       // Get current user's email from authentication
       const credential = request.auth.credentials;
 
       // Update user
       await this.usersService.update({
         email: credential?.email,
-        data: value
+        data: request.payload
       });
 
       this.log.info(`User updated successfully: ${credential?.email}`);
@@ -334,25 +330,6 @@ class UsersController extends BaseController {
           ]
         };
         throw errResponse;
-      }
-
-      // Validate email
-      const { error } = this.validation.login.extract('email').validate(email);
-
-      if (error) {
-        this.log.warn(`Email validation error in delete: ${error.message}`);
-        return this.baseResponse({
-          hapiResponse: h,
-          payload: {
-            errors: error.details.map((detail) => ({
-              title: 'USERS_VALIDATION_ERROR',
-              detail: detail.message,
-              status: 400,
-              code: 'VALIDATION_ERROR'
-            }))
-          },
-          statusCode: 400
-        });
       }
 
       // Delete user

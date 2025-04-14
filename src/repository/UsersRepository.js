@@ -98,7 +98,7 @@ export default class UsersRepository extends BaseRepositoryImpl {
    * @returns {Promise<Object>}
    */
   async getByEmail(email) {
-    return this.user.findFirstOrThrow({
+    return this.user.findFirst({
       where: {
         email
       },
@@ -118,6 +118,10 @@ export default class UsersRepository extends BaseRepositoryImpl {
     await this.user.update({
       where: {
         email
+      },
+      omit: {
+        deletedAt: true,
+        password: true
       },
       data
     });
@@ -146,8 +150,20 @@ export default class UsersRepository extends BaseRepositoryImpl {
       where: {
         email
       },
+      omit: {
+        deletedAt: true,
+        password: true,
+        role: true
+      },
       include: {
-        profile: true,
+        profile: {
+          select: {
+            id: true,
+            image: true,
+            age: true,
+            gender: true
+          }
+        },
         diagnoses: true
       }
     });

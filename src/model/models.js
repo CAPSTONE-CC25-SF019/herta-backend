@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { getPrismaClient } from '@prisma/client/runtime/binary';
 import { createSoftDeleteMiddleware } from 'prisma-soft-delete-middleware';
 
 /**
@@ -72,7 +71,7 @@ const models = {
   /**
    * @type {PrismaClient}
    */
-  Client: getPrismaClient()
+  Client: getPrismaInstance()
 };
 
 export default models;

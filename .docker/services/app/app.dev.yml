@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        username: "apps"
+    container_name: app-dev
+    env_file: ./.docker/env/app/.env.dev
+    networks:
+      - app-dev-net
+      - mariadb-dev-net
+    ports:
+      - '8080:8081'
+    depends_on:
+      - mariadb-dev
+
+
+networks:
+  app-dev-net:
+    name: app-dev-net
+

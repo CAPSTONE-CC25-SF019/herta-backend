@@ -1,9 +1,11 @@
 model Disease {
-  id          String        @id @default(uuid())
-  name        String        @unique
-  image       String?        
+  id          String  @id @default(uuid())
+  name        String  @unique
+  image       String?
   description String?
 
-  symptoms SymptomsOnDiseases[]
+  symptoms  SymptomsOnDiseases[]
+  diagnoses Diagnosis[]
+
   @@map("diseases")
 }

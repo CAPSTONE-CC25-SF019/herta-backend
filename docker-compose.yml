@@ -1,3 +1,7 @@
 include:
   - path: ./.docker/services/mysql/mysql.${APP_ENV:-dev}.yml
     project_directory: ./
+  - path: ./.docker/services/app/app.${APP_ENV:-dev}.yml
+    project_directory: ./
+
+
