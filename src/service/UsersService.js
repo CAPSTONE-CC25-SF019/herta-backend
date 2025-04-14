@@ -133,6 +133,17 @@ export default class UsersService extends BaseService {
       const data = await this.usersRepository.getByEmail(
         options?.payload?.email
       );
+      if (!data) {
+        this.log.error(
+          `Login failed: User with email ${options.email} not found`
+        );
+        throw new ErrorService({
+          title: 'USERS_NOT_FOUND',
+          message: `users with email ${options?.email} not exists`,
+          status: 404,
+          code: 'NOT_FOUND'
+        });
+      }
       if (
         !this.hash.verifyPassword(options?.payload.password, data?.password)
       ) {
