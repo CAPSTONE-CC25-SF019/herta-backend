@@ -1,5 +1,6 @@
-// eslint-disable-next-line no-unused-vars
+ 
 import Boom from '@hapi/boom';
+// eslint-disable-next-line
 import Hapi from '@hapi/hapi';
 
 /**
