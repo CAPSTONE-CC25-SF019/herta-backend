@@ -57,7 +57,7 @@ const models = {
   /**
    * Disease Model
    */
-  Disease: getPrismaInstance().disease, 
+  Disease: getPrismaInstance().disease,
 
   /**
    * Symptoms On Diagnoses Model
