@@ -54,5 +54,7 @@ RUN npm run db:generate \
 
 USER ${username}:${username}
 
+
 ENTRYPOINT ["node"]
 CMD [ "src/index.js" ]
+
