@@ -5,6 +5,6 @@ coverage
 .github
 node_modules
 commit.sh
-
+.env
 
 

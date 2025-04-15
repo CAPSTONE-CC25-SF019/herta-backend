@@ -13,7 +13,7 @@ const errorResponse = Joi.object({
     .items(
       Joi.object({
         title: Joi.string().required(),
-        detail: Joi.string().required(),
+        detail: Joi.any().required(),
         status: Joi.number().required(),
         code: Joi.string().required()
       }).label('ErrorDetail')
