@@ -12,30 +12,45 @@ export default class MachineLearningAPI {
    * @throws {Error}
    */
   async predictions(data) {
-    return models.Disease.findMany({
-      where: {
-        symptoms: {
-          some: {
-            symptom: {
-              name: {
-                in: data.symptoms
+    try {
+      const { symptoms } = data;
+      const response = await fetch(this.baseUrl + '/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ symptoms }),
+      });
+      const responseJson = await response.json();
+      const disease = await models.Disease.findFirst({
+        where: {
+          name: responseJson?.predicted_disease,
+        },
+        select: {
+          id: true
+        }
+      });
+
+      const symptomNames = (await models.Symptom.findMany({
+        where: {
+          diseases: {
+            some: {
+              disease: {
+                id: disease?.id
               }
             }
           }
+        },
+        select: {
+          name: true
         }
-      },
-      select: {
-        id: true,
-        symptoms: {
-          select: {
-            symptom: {
-              select: {
-                name: true
-              }
-            }
-          }
-        }
-      }
-    });
+      })).map((symptom) => (symptom.name));
+
+
+      return [{diseaseId: disease?.id, symptomNames , confidence: parseInt(responseJson?.confidence.split('%')[0])}]
+    } catch (error) {
+      console.warn(error?.message);
+      throw error;
+    }
   }
 }
