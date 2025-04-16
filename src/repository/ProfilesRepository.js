@@ -40,7 +40,7 @@ export default class ProfilesRepository extends BaseRepositoryImpl {
   async updateByUserEmail(email, data) {
     await this.profiles.update({
       where: {
-        userEmail: data.email
+        userEmail: email
       },
       data
     });
