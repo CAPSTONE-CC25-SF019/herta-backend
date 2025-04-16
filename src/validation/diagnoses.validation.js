@@ -6,6 +6,7 @@ export default {
   create: Joi.object({
     symptomNames: Joi.alternatives()
       .try(Joi.array().items(Joi.string()), Joi.string())
+      .required()
       // eslint-disable-next-line
       .custom((value, helpers) => {
         if (typeof value === 'string') {
@@ -18,7 +19,8 @@ export default {
       )
       .messages({
         'alternatives.types': 'name must be a string or array of strings',
-        'array.base': 'name must be an array of strings'
+        'array.base': 'name must be an array of strings',
+        'any.required': 'the symptom name is required',
       })
   }).label('DiagnosesCreateBody'),
   filterById: DiseasesValidation.filterById,
