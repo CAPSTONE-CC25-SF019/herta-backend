@@ -1,10 +1,6 @@
 import models from '../model/models.js';
 import BaseRepositoryImpl from './BaseRepositoryImpl.js';
 
-
-
-
-
 export default class DiagnosesRepository extends BaseRepositoryImpl {
   /**
    * Create New Instance Diagnoses
@@ -31,9 +27,9 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
               diseaseId: prediction.diseaseId,
               userId: user.id,
               symptoms: {
-                create: prediction.symptomNames.map(name => ({
+                create: prediction.symptomNames.map((name) => ({
                   symptom: {
-                    connect: { name },
+                    connect: { name }
                   }
                 }))
               }
@@ -46,7 +42,6 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
               }
             }
           });
-
 
           return diagnosis;
         })
@@ -106,7 +101,6 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
     });
   }
 
-
   /**
    * Delete Diagnosis by ID
    * @param {{ userId: string, id: string }} data
@@ -117,7 +111,7 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
       where: {
         id: data.id,
         AND: {
-          userId: data.userId,
+          userId: data.userId
         }
       }
     });
@@ -267,7 +261,7 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
             symptom: true
           }
         }
-      },
+      }
     });
   }
 
