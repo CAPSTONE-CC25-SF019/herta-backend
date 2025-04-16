@@ -56,15 +56,7 @@ export default class DiagnosesService extends BaseService {
 
       this.log.info('Successfully validation users');
       this.log.info('Creating diagnose for user');
-      // Dummy Predictions
-      diagnoses.forEach((diagnose) => {
-        diagnose.diseaseId = diagnose.id;
-        diagnose.symptomNames = diagnose.symptoms.map((s) => s.symptom.name);
-        diagnose.confidence = Math.random(); // Atau rumus kamu yang benar
 
-        delete diagnose.symptoms;
-        delete diagnose.id;
-      });
 
       this.log.info('Successfully create diagnoses for user');
 
