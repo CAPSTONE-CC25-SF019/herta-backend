@@ -30,6 +30,7 @@ export default {
   filterByNames: Joi.object({
     names: Joi.alternatives()
       .try(Joi.array().items(Joi.string()), Joi.string())
+      .required()
       // eslint-disable-next-line
       .custom((value, helpers) => {
         if (typeof value === 'string') {
@@ -42,7 +43,8 @@ export default {
       )
       .messages({
         'alternatives.types': 'name must be a string or array of strings',
-        'array.base': 'name must be an array of strings'
+        'array.base': 'name must be an array of strings',
+        'any.required': 'this names is required'
       })
   }).label('FilterByNamesQuery'),
 
