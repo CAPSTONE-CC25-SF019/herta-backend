@@ -1,27 +1,23 @@
 // diagnoses.routes.js
-import DiagnosesService from '../service/DiagnosesService.js';
+import MachineLearningAPI from '../config/api/MachineLearningAPI.js';
 import DiagnosesController from '../controller/DiagnosesController.js';
+import DiagnosesService from '../service/DiagnosesService.js';
 import generateBadRequestResponse from '../utils/generateBadRequestResponse.js';
 import swaggerPlugins from '../utils/swaggerPlugins.js';
-import ResponseValidation from '../validation/response.validation.js';
 import DiagnosesValidation from '../validation/diagnoses.validation.js';
-import UsersValidation from '../validation/users.validation.js';
 import DiseasesValidation from '../validation/diseases.validation.js';
+import ResponseValidation from '../validation/response.validation.js';
 import SymptomsValidation from '../validation/symptoms.validation.js';
-import MachineLearningAPI from '../config/api/MachineLearningAPI.js';
+import UsersValidation from '../validation/users.validation.js';
 
 /**
  * Register diagnoses-related API routes
  *
  * @returns {Array<Object>} Array of Hapi route definitions
  */
-export default function() {
-  const diagnosesService = new DiagnosesService(
-    new MachineLearningAPI()
-  );
-  const diagnosesController = new DiagnosesController(
-    diagnosesService,
-  );
+export default function () {
+  const diagnosesService = new DiagnosesService(new MachineLearningAPI());
+  const diagnosesController = new DiagnosesController(diagnosesService);
 
   const failAction = (request, h, err) => {
     return generateBadRequestResponse(h, err, 'DIAGNOSES_VALIDATION_ERROR');
@@ -35,19 +31,20 @@ export default function() {
       options: {
         auth: 'jwt',
         description: 'Create a new diagnosis',
-        notes: 'Creates a new medical diagnosis record. Requires authentication.',
+        notes:
+          'Creates a new medical diagnosis record. Requires authentication.',
         tags: ['api', 'diagnoses'],
         validate: {
           payload: DiagnosesValidation.create,
-          failAction,
+          failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.create(request, h),
+        handler: (request, h) => diagnosesController.create(request, h)
       }
     },
 
@@ -58,20 +55,21 @@ export default function() {
       options: {
         auth: 'jwt',
         description: 'Update diagnosis information',
-        notes: 'Updates a diagnosis record for the given ID. Requires authentication.',
+        notes:
+          'Updates a diagnosis record for the given ID. Requires authentication.',
         tags: ['api', 'diagnoses'],
         validate: {
           payload: DiagnosesValidation.create,
           params: DiagnosesValidation.filterById,
-          failAction,
+          failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.update(request, h),
+        handler: (request, h) => diagnosesController.update(request, h)
       }
     },
 
@@ -82,19 +80,20 @@ export default function() {
       options: {
         auth: 'jwt',
         description: 'Delete a diagnosis',
-        notes: 'Deletes a diagnosis record for the given ID. Requires authentication.',
+        notes:
+          'Deletes a diagnosis record for the given ID. Requires authentication.',
         tags: ['api', 'diagnoses'],
         validate: {
           params: DiagnosesValidation.filterById,
-          failAction,
+          failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.delete(request, h),
+        handler: (request, h) => diagnosesController.delete(request, h)
       }
     },
 
@@ -105,19 +104,20 @@ export default function() {
       options: {
         auth: 'jwt',
         description: 'Get diagnoses by user ID',
-        notes: 'Returns all diagnosis records for a specific user. Admin access only.',
+        notes:
+          'Returns all diagnosis records for a specific user. Admin access only.',
         tags: ['api', 'diagnoses', 'users', 'relationships', 'admin'],
         validate: {
           params: UsersValidation.filterById,
-          failAction,
+          failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.getByUserId(request, h),
+        handler: (request, h) => diagnosesController.getByUserId(request, h)
       }
     },
 
@@ -127,19 +127,19 @@ export default function() {
       path: '/api/v1/diagnoses/self/relationship/users',
       options: {
         auth: 'jwt',
-        description: 'Get current user\'s diagnoses',
+        description: "Get current user's diagnoses",
         notes: 'Returns all diagnosis records for the authenticated user.',
         tags: ['api', 'diagnoses', 'users', 'relationships'],
         validate: {
-          failAction,
+          failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.getSelfDetail(request, h),
+        handler: (request, h) => diagnosesController.getSelfDetail(request, h)
       }
     },
 
@@ -149,20 +149,22 @@ export default function() {
       path: '/api/v1/diagnoses/self/relationship/diseases/{id}',
       options: {
         auth: 'jwt',
-        description: 'Get current user\'s diagnoses by disease ID',
-        notes: 'Returns the authenticated user\'s diagnoses for a specific disease.',
+        description: "Get current user's diagnoses by disease ID",
+        notes:
+          "Returns the authenticated user's diagnoses for a specific disease.",
         tags: ['api', 'diagnoses', 'diseases', 'relationships'],
         validate: {
           params: DiseasesValidation.filterById,
-          failAction,
+          failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.getSelfByDiseaseId(request, h),
+        handler: (request, h) =>
+          diagnosesController.getSelfByDiseaseId(request, h)
       }
     },
 
@@ -173,19 +175,20 @@ export default function() {
       options: {
         auth: 'jwt',
         description: 'Get all diagnoses by disease ID',
-        notes: 'Returns all diagnoses for a specific disease. Admin access only.',
+        notes:
+          'Returns all diagnoses for a specific disease. Admin access only.',
         tags: ['api', 'diagnoses', 'diseases', 'relationships', 'admin'],
         validate: {
           params: DiseasesValidation.filterById,
-          failAction,
+          failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.getByDiseaseId(request, h),
+        handler: (request, h) => diagnosesController.getByDiseaseId(request, h)
       }
     },
 
@@ -196,19 +199,20 @@ export default function() {
       options: {
         auth: 'jwt',
         description: 'Get all diagnoses by symptoms',
-        notes: 'Returns all diagnoses associated with specified symptoms. Admin access only.',
+        notes:
+          'Returns all diagnoses associated with specified symptoms. Admin access only.',
         tags: ['api', 'diagnoses', 'symptoms', 'relationships', 'admin'],
         validate: {
           query: SymptomsValidation.filterByNames,
           failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.getBySymptoms(request, h),
+        handler: (request, h) => diagnosesController.getBySymptoms(request, h)
       }
     },
 
@@ -226,12 +230,12 @@ export default function() {
           failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.getAll(request, h),
+        handler: (request, h) => diagnosesController.getAll(request, h)
       }
     },
 
@@ -241,20 +245,22 @@ export default function() {
       path: '/api/v1/diagnoses/self/relationship/symptoms',
       options: {
         auth: 'jwt',
-        description: 'Get current user\'s diagnoses by symptoms',
-        notes: 'Returns the authenticated user\'s diagnoses associated with specified symptoms.',
+        description: "Get current user's diagnoses by symptoms",
+        notes:
+          "Returns the authenticated user's diagnoses associated with specified symptoms.",
         tags: ['api', 'diagnoses', 'symptoms', 'relationships'],
         validate: {
           query: SymptomsValidation.filterByNames,
           failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.getSelfBySymptoms(request, h),
+        handler: (request, h) =>
+          diagnosesController.getSelfBySymptoms(request, h)
       }
     },
 
@@ -265,19 +271,20 @@ export default function() {
       options: {
         auth: 'jwt',
         description: 'Get diagnosis statistics for a user',
-        notes: 'Returns statistical data about diagnoses for a specific user. Admin access only.',
+        notes:
+          'Returns statistical data about diagnoses for a specific user. Admin access only.',
         tags: ['api', 'diagnoses', 'users', 'statistics', 'admin'],
         validate: {
           params: UsersValidation.filterById,
           failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.getStatistics(request, h),
+        handler: (request, h) => diagnosesController.getStatistics(request, h)
       }
     },
 
@@ -287,20 +294,22 @@ export default function() {
       path: '/api/v1/diagnoses/self/relationship/users/statistics',
       options: {
         auth: 'jwt',
-        description: 'Get current user\'s diagnosis statistics',
-        notes: 'Returns statistical data about diagnoses for the authenticated user.',
+        description: "Get current user's diagnosis statistics",
+        notes:
+          'Returns statistical data about diagnoses for the authenticated user.',
         tags: ['api', 'diagnoses', 'users', 'statistics'],
         validate: {
           failAction
         },
         plugins: {
-          ...swaggerPlugins,
+          ...swaggerPlugins
         },
         response: {
           ...ResponseValidation
         },
-        handler: (request, h) => diagnosesController.getSelfStatistics(request, h),
+        handler: (request, h) =>
+          diagnosesController.getSelfStatistics(request, h)
       }
     }
-  ]
+  ];
 }
