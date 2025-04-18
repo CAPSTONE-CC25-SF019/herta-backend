@@ -2,8 +2,8 @@
 import DiseasesController from '../controller/DiseasesController.js';
 import DiseasesService from '../service/DiseasesService.js';
 import generateBadRequestResponse from '../utils/generateBadRequestResponse.js';
-import DiseasesValidation from '../validation/diseases.validation.js';
 import swaggerPlugins from '../utils/swaggerPlugins.js';
+import DiseasesValidation from '../validation/diseases.validation.js';
 import ResponseValidation from '../validation/response.validation.js';
 
 /**
@@ -28,9 +28,7 @@ export default function () {
         description: 'Get all diseases with pagination',
         notes: 'Returns a paginated list of medical diseases.',
         tags: ['api', 'diseases'],
-        plugins: {
-
-        },
+        plugins: {},
         response: {
           ...ResponseValidation
         },
@@ -49,7 +47,8 @@ export default function () {
       options: {
         auth: 'jwt',
         description: 'Update disease information',
-        notes: 'Updates disease details for the given disease ID. Requires authentication.',
+        notes:
+          'Updates disease details for the given disease ID. Requires authentication.',
         tags: ['api', 'diseases'],
         plugins: {
           ...swaggerPlugins
@@ -74,8 +73,7 @@ export default function () {
         description: 'Get disease by ID',
         notes: 'Returns a specific disease based on its ID.',
         tags: ['api', 'diseases'],
-        plugins: {
-        },
+        plugins: {},
         response: {
           ...ResponseValidation
         },
@@ -93,10 +91,10 @@ export default function () {
       path: '/api/v1/diseases/relationship/symptoms',
       options: {
         description: 'Get diseases by symptoms',
-        notes: 'Returns diseases that are associated with the provided list of symptom names.',
+        notes:
+          'Returns diseases that are associated with the provided list of symptom names.',
         tags: ['api', 'diseases', 'symptoms', 'relationships'],
-        plugins: {
-        },
+        plugins: {},
         response: {
           ...ResponseValidation
         },
