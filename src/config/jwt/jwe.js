@@ -60,7 +60,7 @@ export default class Jwe {
       const decodedResult = this.decoder.decode(decryptResult.plaintext);
       return JSON.parse(decodedResult);
     } catch (error) {
-      console.error('Error decrypting payload:', error);
+      console.error('Error decrypting payload:', error?.reason);
       throw error;
     }
   }
