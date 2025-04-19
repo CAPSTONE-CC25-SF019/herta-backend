@@ -1,7 +1,8 @@
- 
+
 import Boom from '@hapi/boom';
 
 import BaseController from './BaseController.js';
+import ErrorService from '../error/ErrorService.js';
 
 class UsersController extends BaseController {
   /**
@@ -127,11 +128,37 @@ class UsersController extends BaseController {
     }
   }
 
+  async logout(request, h) {
+    try {
+      const { email } = request.query;
+      await this.usersService.logout({payload: email});
+      const response = this.createResponse({
+        hapiResponse: h,
+        response: {
+          title: 'SUCCESSFULLY_LOGOUT_USERS',
+          data: {
+            message: 'users has been logged out.'
+          },
+          status: 200,
+          code: 'STATUS_OK'
+        }
+      });
+      return response;
+    } catch (err) {
+      this.log.error(`Getting error when logout because ${err?.message}`);
+      return this.handleError({
+        hapiResponse: h,
+        error: err,
+        messageInternalServer: `An unexpected error occurred during logout.\n${err.message}`
+      });
+    }
+  }
+
   async refreshToken(request, h) {
     this.log.info('Processing Refresh token');
     try {
       // Get the token from cookies
-      const refreshToken = request.state.refreshToken;
+      const { refreshToken } = request.payload;
       if (!refreshToken) {
         return this.baseResponse({
           hapiResponse: h,
@@ -221,19 +248,12 @@ class UsersController extends BaseController {
         response: {
           title: 'SUCCESSFULLY_LOGIN_USERS',
           data: {
-            accessToken: tokens.accessToken
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken
           },
           status: 200,
           code: 'STATUS_OK'
         }
-      });
-
-      // Set refresh token as HTTP-only cookie
-      response.state('refreshToken', tokens.refreshToken, {
-        path: '/',
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none'
       });
 
       return response;
