@@ -7,7 +7,6 @@ model Profile {
   id           String  @id @default(uuid())
   image        String  @db.Text
   user         User    @relation(fields: [userEmail], references: [email], onDelete: Cascade, onUpdate: Cascade)
-  age          Int
   refreshToken String? @map("refresh_token") @db.Text
   gender       Gender
   userEmail    String  @unique @map("user_email")

@@ -132,17 +132,6 @@ export default {
       .messages({
         'any.only': "The role must be equal 'ADMIN', 'USER'"
       }),
-    age: Joi.number()
-      .required()
-      .min(15)
-      .max(200)
-      .description('The age of the user')
-      .messages({
-        'number.base': 'The age must be a number',
-        'number.max': 'The age must be maximal 200 years old',
-        'number.min': 'The age must be a minimal 15 years old',
-        'any.required': 'this age is required'
-      }),
     image: Joi.string()
       .uri()
       .min(5)
@@ -204,17 +193,6 @@ export default {
         'string.min': 'Must have at least 8 characters',
         'string.max': 'Must have max 255 characters',
         'any.required': 'this password is required'
-      }),
-    age: Joi.number()
-      .required()
-      .min(15)
-      .max(200)
-      .description('Updated age of the user')
-      .messages({
-        'number.base': 'The age must be a number',
-        'number.max': 'The age must be maximal 200 years old',
-        'number.min': 'The age must be a minimal 15 years old',
-        'any.required': 'this age is required'
       }),
     image: Joi.string()
       .uri()
