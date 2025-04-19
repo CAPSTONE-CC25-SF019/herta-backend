@@ -61,7 +61,7 @@ export default class Jws {
       });
       return result;
     } catch (error) {
-      console.error('Error verifying token:', error);
+      console.error('Error verifying token:', error?.reason);
       throw error;
     }
   }
