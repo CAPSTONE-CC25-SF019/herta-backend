@@ -209,6 +209,7 @@ class UsersController extends BaseController {
     this.log.info('Processing user login');
     try {
       // Perform login
+      this.log.info(JSON.stringify(request.payload));
       const tokens = await this.usersService.login({
         payload: request.payload
       });
