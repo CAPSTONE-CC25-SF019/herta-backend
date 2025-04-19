@@ -122,26 +122,39 @@ export default class BaseService {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       // Unique constraint violation
       if (error.code === 'P2002') {
-        const field = error.meta?.target?.[0] || 'field';
-        throw ErrorService.conflict(this.entityName, field, 'value');
+        const field = error.meta?.target || 'field';
+        throw ErrorService.conflict({
+          entityName: this.entityName,
+          fieldName: field
+        });
       }
 
       // Foreign key constraint failed
       if (error.code === 'P2003') {
-        throw ErrorService.validation(
-          `Related ${error.meta?.field_name || 'entity'} does not exist`
-        );
+        throw ErrorService.validation({
+          entityName: this.entityName,
+          message: `${error.message}\n related ${error.meta?.field_name || this.entityName} does not exists`
+        });
       }
 
       // Record not found
       if (error.code === 'P2025') {
-        throw ErrorService.notFound(this.entityName, error?.cause);
+        const errService = ErrorService.notFound({
+          entityName: this.entityName,
+          fieldName: null,
+          fieldValue: null
+        });
+        errService.message = error?.cause.toString();
+        throw errService;
       }
     }
 
     // Handle Prisma validation errors
     if (error instanceof Prisma.PrismaClientValidationError) {
-      throw ErrorService.validation(error.message);
+      throw ErrorService.validation({
+        entityName: this.entityName,
+        message: error.message
+      });
     }
 
     // Generic error handling
