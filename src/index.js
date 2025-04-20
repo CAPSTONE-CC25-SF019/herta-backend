@@ -4,7 +4,6 @@ import Vision from '@hapi/vision';
 import HapiSwagger from 'hapi-swagger';
 import Joi from 'joi';
 import process from 'node:process';
-
 import Routes from './routes/routes.js';
 import statusToCode from './utils/statusToCode.js';
 
@@ -26,7 +25,6 @@ const init = async (host, port) => {
         }
       }
     });
-
     const swaggerOptions = {
       info: {
         title: 'Herta API Documentation',
