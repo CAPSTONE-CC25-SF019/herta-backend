@@ -2,9 +2,9 @@
 import SymptomsController from '../controller/SymptomsController.js';
 import SymptomsService from '../service/SymtompsService.js';
 import generateBadRequestResponse from '../utils/generateBadRequestResponse.js';
-import SymptomsValidation from '../validation/symptoms.validation.js';
 import swaggerPlugins from '../utils/swaggerPlugins.js';
 import ResponseValidation from '../validation/response.validation.js';
+import SymptomsValidation from '../validation/symptoms.validation.js';
 
 /**
  * Register symptoms-related API routes
@@ -28,9 +28,7 @@ export default function () {
         description: 'Get all symptoms with pagination',
         notes: 'Returns a paginated list of medical symptoms.',
         tags: ['api', 'symptoms'],
-        plugins: {
-
-        },
+        plugins: {},
         response: {
           ...ResponseValidation
         },
@@ -50,9 +48,7 @@ export default function () {
         description: 'Get symptom by name',
         notes: 'Returns a specific symptom based on its name.',
         tags: ['api', 'symptoms'],
-        plugins: {
-
-        },
+        plugins: {},
         response: {
           ...ResponseValidation
         },
@@ -71,7 +67,8 @@ export default function () {
       options: {
         auth: 'jwt',
         description: 'Update symptom information',
-        notes: 'Updates symptom details for the given symptom ID. Requires authentication.',
+        notes:
+          'Updates symptom details for the given symptom ID. Requires authentication.',
         tags: ['api', 'symptoms'],
         plugins: {
           ...swaggerPlugins
@@ -94,11 +91,10 @@ export default function () {
       path: '/api/v1/symptoms/relationship/diseases',
       options: {
         description: 'Get diseases associated with symptoms',
-        notes: 'Returns diseases that are associated with the provided list of symptom names.',
+        notes:
+          'Returns diseases that are associated with the provided list of symptom names.',
         tags: ['api', 'symptoms', 'diseases', 'relationships'],
-        plugins: {
-
-        },
+        plugins: {},
         response: {
           ...ResponseValidation
         },
@@ -116,11 +112,10 @@ export default function () {
       path: '/api/v1/symptoms/relationship/diagnoses/{id}',
       options: {
         description: 'Get diagnoses related to a symptom',
-        notes: 'Returns diagnoses that are associated with the specified symptom ID.',
+        notes:
+          'Returns diagnoses that are associated with the specified symptom ID.',
         tags: ['api', 'symptoms', 'diagnoses', 'relationships'],
-        plugins: {
-
-        },
+        plugins: {},
         response: {
           ...ResponseValidation
         },
