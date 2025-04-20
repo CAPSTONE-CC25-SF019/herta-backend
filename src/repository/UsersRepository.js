@@ -160,7 +160,6 @@ export default class UsersRepository extends BaseRepositoryImpl {
           select: {
             id: true,
             image: true,
-            age: true,
             gender: true
           }
         },

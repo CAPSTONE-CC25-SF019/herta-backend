@@ -28,7 +28,6 @@ export default class ProfilesRepository extends BaseRepositoryImpl {
    *
    * @param email {string}
    * @param data {{
-   *   age: number,
    *   image: string,
    *   gender: string
    * }}

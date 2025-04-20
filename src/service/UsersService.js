@@ -312,7 +312,6 @@ export default class UsersService extends BaseService {
    *   password: string
    *   role: string
    *   image: string|null
-   *   age: number
    *   gender: string
    * }}
    * @returns {Promise<{user: Object, profile: Object}>}
@@ -320,7 +319,7 @@ export default class UsersService extends BaseService {
   async register(options) {
     this.log.info(`Registering new user with email: ${options.email}`);
     try {
-      const { image, age, gender, ...data } = options;
+      const { image,gender, ...data } = options;
       data.password = this.hash.hashPassword(data.password);
 
       const createdUser = await this.usersRepository.create(data);
@@ -329,7 +328,6 @@ export default class UsersService extends BaseService {
       const createdProfile = await this.profilesRepository.create({
         image,
         gender,
-        age,
         userEmail: data.email
       });
       this.log.info(`Profile created successfully for user: ${data.email}`);
@@ -350,7 +348,6 @@ export default class UsersService extends BaseService {
    *   password: string
    *   role: string
    *   image: string|null
-   *   age: number
    *   gender: string
    * }}}
    * @returns {Promise<void>}
@@ -358,7 +355,7 @@ export default class UsersService extends BaseService {
   async update(options) {
     this.log.info(`Updating user with email: ${options.email}`);
     try {
-      const { image, gender, age, ...data } = options.data;
+      const { image, gender, ...data } = options.data;
       const user = await this.usersRepository.getByEmail(options.email);
 
       if (!user) {
@@ -381,7 +378,6 @@ export default class UsersService extends BaseService {
         user.email,
         {
           image,
-          age,
           gender
         }
       );
