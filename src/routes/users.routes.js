@@ -2,9 +2,9 @@ import Hash from '../config/hash/bcrypt.js';
 import UsersController from '../controller/UsersController.js';
 import UsersService from '../service/UsersService.js';
 import generateBadRequestResponse from '../utils/generateBadRequestResponse.js';
-import UsersValidation from '../validation/users.validation.js';
 import swaggerPlugins from '../utils/swaggerPlugins.js';
 import ResponseValidation from '../validation/response.validation.js';
+import UsersValidation from '../validation/users.validation.js';
 
 /**
  * Registers user-related API routes.
@@ -46,7 +46,8 @@ export default function ({ jwe, jws }) {
       options: {
         auth: 'jwt',
         description: 'Get users with cursor pagination',
-        notes: 'Returns a list of users using cursor-based (infinite scroll style) pagination.',
+        notes:
+          'Returns a list of users using cursor-based (infinite scroll style) pagination.',
         tags: ['api', 'users'],
         plugins: {
           ...swaggerPlugins
