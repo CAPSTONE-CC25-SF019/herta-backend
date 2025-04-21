@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { extname } from 'node:path';
 import { cwd } from 'node:process';
 
 /**
@@ -11,7 +10,14 @@ import { cwd } from 'node:process';
  * @throws {Error} - error if the file not extension json
  */
 export default function (filename) {
-  if (!extname(filename) == 'json')
-    throw new Error('filename must be format json');
-  return JSON.parse(readFileSync(`${cwd()}/cert/${filename}`).toString());
+  const path = `${cwd()}/cert/${filename}`;
+  console.log(`Reading key from: ${path}`);
+  const fileContent = readFileSync(path).toString();
+
+  try {
+    return JSON.parse(fileContent);
+  } catch (error) {
+    console.error(`Error parsing JSON file ${filename}:`, error);
+    throw error;
+  }
 }
