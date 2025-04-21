@@ -17,12 +17,9 @@ export default class ProfilesRepository extends BaseRepositoryImpl {
    * @returns {Prisma.Prisma__ProfileClient<GetResult<Prisma.$ProfilePayload<DefaultArgs>, {where: {userEmail}, omit: {password: boolean}}, "findFirstOrThrow", Prisma.PrismaClientOptions>, never, DefaultArgs, Prisma.PrismaClientOptions>}
    */
   async getByUserEmail(email) {
-    return this.profiles.findFirstOrThrow({
+    return this.profiles.findFirst({
       where: {
         userEmail: email
-      },
-      omit: {
-        password: true
       }
     });
   }
