@@ -102,6 +102,23 @@ export default function ({ jwe, jws }) {
       }
     },
     {
+      method: 'DELETE',
+      path: '/api/v1/users/logout',
+      options: {
+        description: 'Logout users from their account',
+        notes: 'Logout a user account.',
+        tags: ['api', 'users', 'auth'],
+        response: {
+          ...ResponseValidation
+        },
+        validate: {
+          query: UsersValidation.filterByEmail,
+          failAction
+        },
+        handler: (request, h) => usersController.logout(request, h)
+      }
+    },
+    {
       method: 'POST',
       path: '/api/v1/users/login',
       options: {
@@ -119,12 +136,16 @@ export default function ({ jwe, jws }) {
       }
     },
     {
-      method: 'GET',
+      method: 'POST',
       path: '/api/v1/users/refresh-token',
       options: {
         description: 'Refresh JWT token',
         notes: 'Returns a new access token using a valid refresh token.',
         tags: ['api', 'users', 'auth'],
+        validate: {
+          payload: UsersValidation.refreshToken,
+          failAction
+        },
         response: {
           ...ResponseValidation
         },
