@@ -7,16 +7,9 @@ import SymptomsRepository from '../repository/SymptomsRepository.js';
 import UsersRepository from '../repository/UsersRepository.js';
 import BaseService from './BaseService.js';
 
-
-
-
-
 export default class DiagnosesService extends BaseService {
   constructor(MachineLearningAPI) {
-    super(
-      new DiagnosesRepository(),
-      'diagnoses'
-    );
+    super(new DiagnosesRepository(), 'diagnoses');
     /**
      *
      * @type {DiagnosesRepository}
@@ -47,41 +40,46 @@ export default class DiagnosesService extends BaseService {
       // Validate the users if registered or not
       const user = await this.usersRepository.getByEmail(credential.email);
       if (!user) {
-        this.log.info('Failed to create diagnose for user because user does not exist');
+        this.log.info(
+          'Failed to create diagnose for user because user does not exist'
+        );
         throw ErrorService.notFound({
           entityName: 'users',
           fieldName: 'email',
-          fieldValue: credential.email,
+          fieldValue: credential.email
         });
       }
 
-      const diagnoses = await this.mlAPIClient.predictions({symptoms: symptomNames})
+      const diagnoses = await this.mlAPIClient.predictions({
+        symptoms: symptomNames
+      });
 
       this.log.info('Successfully validation users');
       this.log.info('Creating diagnose for user');
       // Dummy Predictions
-      diagnoses.forEach(diagnose => {
+      diagnoses.forEach((diagnose) => {
         diagnose.diseaseId = diagnose.id;
-        diagnose.symptomNames = diagnose.symptoms.map(s => s.symptom.name);
+        diagnose.symptomNames = diagnose.symptoms.map((s) => s.symptom.name);
         diagnose.confidence = Math.random(); // Atau rumus kamu yang benar
 
         delete diagnose.symptoms;
         delete diagnose.id;
       });
 
-
       this.log.info('Successfully create diagnoses for user');
 
-      const result = await this.diagnosesRepository.create({predictions: diagnoses, user: credential })
+      const result = await this.diagnosesRepository.create({
+        predictions: diagnoses,
+        user: credential
+      });
       return {
-        data: result,
+        data: result
       };
     } catch (error) {
       this.log.error('Error creating diagnose for user', error?.message);
       return this.handleError(error);
     }
   }
-
 
   /**
    * Update an existing diagnosis
@@ -91,7 +89,9 @@ export default class DiagnosesService extends BaseService {
    */
   async update(data, symptoms) {
     try {
-      this.log.info(`Request received to update diagnosis with ID: ${data?.id}`);
+      this.log.info(
+        `Request received to update diagnosis with ID: ${data?.id}`
+      );
 
       // Validate parameters
       if (!data) {
@@ -115,10 +115,13 @@ export default class DiagnosesService extends BaseService {
         throw ErrorService.notFound({
           entityName: 'diagnosis',
           fieldName: 'id',
-          fieldValue: data?.id,
+          fieldValue: data?.id
         });
       }
-      const updatedDiagnosis = await this.diagnosesRepository.update(data, symptoms || []);
+      const updatedDiagnosis = await this.diagnosesRepository.update(
+        data,
+        symptoms || []
+      );
       this.log.info(`Diagnosis with ID ${data.id} updated successfully`);
 
       return {
@@ -171,11 +174,12 @@ export default class DiagnosesService extends BaseService {
         data: deletedDiagnosis
       };
     } catch (error) {
-      this.log.error(`Failed to delete diagnosis with ID ${data?.id}: ${error.message}`);
+      this.log.error(
+        `Failed to delete diagnosis with ID ${data?.id}: ${error.message}`
+      );
       return this.handleError(error);
     }
   }
-
 
   /**
    * Get diagnosis statistics for a user
@@ -184,19 +188,25 @@ export default class DiagnosesService extends BaseService {
    */
   async getStatistics(userId) {
     try {
-      this.log.info(`Request received to fetch diagnosis statistics for user ID: ${userId}`);
+      this.log.info(
+        `Request received to fetch diagnosis statistics for user ID: ${userId}`
+      );
 
       // Check users exists
       await this.#validateUserId(userId);
 
       const statistics = await this.diagnosesRepository.getStatistics(userId);
-      this.log.info(`Successfully retrieved diagnosis statistics for user ID ${userId}`);
+      this.log.info(
+        `Successfully retrieved diagnosis statistics for user ID ${userId}`
+      );
 
       return {
         data: statistics
       };
     } catch (error) {
-      this.log.error(`Failed to get diagnosis statistics for user ${userId}: ${error.message}`);
+      this.log.error(
+        `Failed to get diagnosis statistics for user ${userId}: ${error.message}`
+      );
       return this.handleError(error);
     }
   }
@@ -207,13 +217,17 @@ export default class DiagnosesService extends BaseService {
    */
   async getBySymptoms(symptoms) {
     try {
-      this.log.info(`Request received to fetch diagnoses by symptoms: ${JSON.stringify(symptoms)}`);
+      this.log.info(
+        `Request received to fetch diagnoses by symptoms: ${JSON.stringify(symptoms)}`
+      );
 
       // Validate symptoms
       await this.#validateSymptoms(symptoms);
 
       const diagnoses = await this.diagnosesRepository.getBySymptoms(symptoms);
-      this.log.info(`Successfully fetched ${diagnoses.length} diagnoses matching the provided symptoms`);
+      this.log.info(
+        `Successfully fetched ${diagnoses.length} diagnoses matching the provided symptoms`
+      );
 
       return {
         data: diagnoses
@@ -231,19 +245,26 @@ export default class DiagnosesService extends BaseService {
    */
   async getByDiseaseId(diseaseId) {
     try {
-      this.log.info(`Request received to fetch diagnoses for disease ID: ${diseaseId}`);
+      this.log.info(
+        `Request received to fetch diagnoses for disease ID: ${diseaseId}`
+      );
 
       // Validate diseaseId
       await this.#validateDiseaseId(diseaseId);
 
-      const diagnoses = await this.diagnosesRepository.getByDiseaseId(diseaseId);
-      this.log.info(`Successfully fetched ${diagnoses.length} diagnoses for disease ID ${diseaseId}`);
+      const diagnoses =
+        await this.diagnosesRepository.getByDiseaseId(diseaseId);
+      this.log.info(
+        `Successfully fetched ${diagnoses.length} diagnoses for disease ID ${diseaseId}`
+      );
 
       return {
         data: diagnoses
       };
     } catch (error) {
-      this.log.error(`Failed to fetch diagnoses for disease ${diseaseId}: ${error.message}`);
+      this.log.error(
+        `Failed to fetch diagnoses for disease ${diseaseId}: ${error.message}`
+      );
       return this.handleError(error);
     }
   }
@@ -257,7 +278,9 @@ export default class DiagnosesService extends BaseService {
     try {
       const { symptoms, userId } = data;
 
-      this.log.info(`Request received to fetch diagnoses by symptoms: ${JSON.stringify(symptoms)}`);
+      this.log.info(
+        `Request received to fetch diagnoses by symptoms: ${JSON.stringify(symptoms)}`
+      );
 
       // Validate symptoms
       await this.#validateSymptoms(symptoms);
@@ -265,8 +288,11 @@ export default class DiagnosesService extends BaseService {
       // Check if user exists
       await this.#validateUserId(userId);
 
-      const diagnoses = await this.diagnosesRepository.getBySymptomsAndUserId(data);
-      this.log.info(`Successfully fetched ${diagnoses.length} diagnoses matching the provided symptoms`);
+      const diagnoses =
+        await this.diagnosesRepository.getBySymptomsAndUserId(data);
+      this.log.info(
+        `Successfully fetched ${diagnoses.length} diagnoses matching the provided symptoms`
+      );
 
       return {
         data: diagnoses
@@ -286,7 +312,9 @@ export default class DiagnosesService extends BaseService {
     try {
       const { diseaseId, userId } = data;
 
-      this.log.info(`Request received to fetch diagnoses for disease ID: ${diseaseId}`);
+      this.log.info(
+        `Request received to fetch diagnoses for disease ID: ${diseaseId}`
+      );
 
       // Validate diseaseId
       await this.#validateDiseaseId(diseaseId);
@@ -294,19 +322,22 @@ export default class DiagnosesService extends BaseService {
       // Check the userId
       await this.#validateUserId(userId);
 
-      const diagnoses = await this.diagnosesRepository.getByDiseaseId(diseaseId);
-      this.log.info(`Successfully fetched ${diagnoses.length} diagnoses for disease ID ${diseaseId}`);
+      const diagnoses =
+        await this.diagnosesRepository.getByDiseaseId(diseaseId);
+      this.log.info(
+        `Successfully fetched ${diagnoses.length} diagnoses for disease ID ${diseaseId}`
+      );
 
       return {
         data: diagnoses
       };
     } catch (error) {
-      this.log.error(`Failed to fetch diagnoses for disease ${data?.diseaseId}: ${error.message}`);
+      this.log.error(
+        `Failed to fetch diagnoses for disease ${data?.diseaseId}: ${error.message}`
+      );
       return this.handleError(error);
     }
   }
-
-
 
   /**
    * Get all diagnoses for a specific user
@@ -315,19 +346,25 @@ export default class DiagnosesService extends BaseService {
    */
   async getByUserId(userId) {
     try {
-      this.log.info(`Request received to fetch diagnoses for user ID: ${userId}`);
+      this.log.info(
+        `Request received to fetch diagnoses for user ID: ${userId}`
+      );
 
       // Check if user exists
       await this.#validateUserId(userId);
 
       const diagnoses = await this.diagnosesRepository.getByUserId(userId);
-      this.log.info(`Successfully fetched ${diagnoses.length} diagnoses for user ID ${userId}`);
+      this.log.info(
+        `Successfully fetched ${diagnoses.length} diagnoses for user ID ${userId}`
+      );
 
       return {
         data: diagnoses
       };
     } catch (error) {
-      this.log.error(`Failed to fetch diagnoses for user ${userId}: ${error.message}`);
+      this.log.error(
+        `Failed to fetch diagnoses for user ${userId}: ${error.message}`
+      );
       return this.handleError(error);
     }
   }
@@ -342,11 +379,15 @@ export default class DiagnosesService extends BaseService {
   async getAllWithPagination(options) {
     try {
       const { page = 1, size = 10 } = options || {};
-      this.log.info(`Request received to fetch all diagnoses with pagination: page=${page}, size=${size}`);
+      this.log.info(
+        `Request received to fetch all diagnoses with pagination: page=${page}, size=${size}`
+      );
 
       // Validate pagination parameters
       if (page < 1 || size < 1) {
-        this.log.error(`Invalid pagination parameters provided: page=${page}, size=${size}`);
+        this.log.error(
+          `Invalid pagination parameters provided: page=${page}, size=${size}`
+        );
         throw ErrorService.validation({
           message: 'Pagination parameters must be positive numbers',
           fieldName: 'pagination'
@@ -357,14 +398,18 @@ export default class DiagnosesService extends BaseService {
         pagination: { page, limit: size }
       });
 
-      this.log.info(`Successfully fetched ${result.diagnoses.length} diagnoses (page ${result.pagination.currentPage})`);
+      this.log.info(
+        `Successfully fetched ${result.diagnoses.length} diagnoses (page ${result.pagination.currentPage})`
+      );
 
       return {
         data: result.diagnoses,
         pagination: result.pagination
       };
     } catch (error) {
-      this.log.error(`Failed to fetch diagnoses with pagination: ${error.message}`);
+      this.log.error(
+        `Failed to fetch diagnoses with pagination: ${error.message}`
+      );
       return this.handleError(error);
     }
   }
