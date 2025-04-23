@@ -135,11 +135,11 @@ export default class UsersService extends BaseService {
       );
       if (!data) {
         this.log.error(
-          `Login failed: User with email ${options.email} not found`
+          `Login failed: User with email ${options.payload.email} not found`
         );
         throw new ErrorService({
           title: 'USERS_NOT_FOUND',
-          message: `users with email ${options?.email} not exists`,
+          message: `users with email ${options.payload.email} not exists`,
           status: 404,
           code: 'NOT_FOUND'
         });
@@ -179,6 +179,12 @@ export default class UsersService extends BaseService {
         { expiresIn: process.env?.REFRESH_TOKEN_EXPIRE }
       );
 
+      this.log.info(`Update refresh token to profiles users`);
+
+      await this.profilesRepository.updateByUserEmail(data.email,{
+        refreshToken: refreshToken,
+      })
+
       this.log.info(`Tokens generated for user: ${data.email}`);
 
       return {
@@ -192,14 +198,60 @@ export default class UsersService extends BaseService {
   }
 
   /**
+   * @param options {{payload: {email: string}}}
+   * @returns {Promise<Object>}
+   */
+  async logout(options) {
+    this.log.info(`Logout attempt for email: ${options?.payload?.email}`);
+    try {
+      const profile = await this.profilesRepository.getByUserEmail(
+        options?.payload?.email
+      );
+
+      if (!profile) {
+        this.log.error(
+          `Logout failed: User with email ${options.payload.email} not found`
+        );
+        throw new ErrorService({
+          title: 'USERS_NOT_FOUND',
+          message: `users with email ${options.payload.email} not exists`,
+          status: 404,
+          code: 'NOT_FOUND'
+        });
+      }
+
+      if (!profile?.refreshToken) {
+        this.log.warn(`Cannot logout because users not login before`);
+        throw ErrorService.validation({
+          entityName: 'users',
+          message: 'failed to logout because users not login before'
+        });
+      }
+
+      this.log.info(`Update refresh token to profiles users`);
+
+      await this.profilesRepository.updateByUserEmail(profile?.userEmail,{
+        refreshToken: null,
+      })
+
+      this.log.info(`Successfully logout for user: ${profile.userEmail}`);
+
+    } catch (error) {
+      this.log.error(`Logout error: ${error.message}`);
+      return this.handleError(error);
+    }
+  }
+
+  /**
    *
    * @param options {{refreshToken: string}}
    * @returns {Promise<{accessToken: string}|ErrorService>}
    */
   async refreshToken(options) {
     try {
-      // Get the token
+      // Get the refresh token
       const { refreshToken } = options;
+
       this.log.info('Successfully retrieved refresh token');
       // Verify and decrypt the token to payload
       const payloadEncrypted =
