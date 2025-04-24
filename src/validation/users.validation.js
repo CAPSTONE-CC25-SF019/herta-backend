@@ -231,5 +231,13 @@ export default {
         'any.only': "Gender must be equal 'MALE' or 'FEMALE'",
         'any.required': 'this gender is required'
       })
-  }).label('UserUpdateBody')
+  }).label('UserUpdateBody'),
+  refreshToken: Joi.object({
+    refreshToken: Joi.string()
+      .required()
+      .description('The refresh token to create access token again')
+      .messages({
+        'any.required': 'this email is required',
+      }),
+  }).label('UserRefreshTokenBody'),
 };
