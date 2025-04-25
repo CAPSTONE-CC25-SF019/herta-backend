@@ -72,7 +72,7 @@ const models = {
   /**
    * @type {PrismaClient}
    */
-  Client: getPrismaClient()
+  Client: getPrismaInstance()
 };
 
 export default models;
