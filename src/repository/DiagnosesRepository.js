@@ -1,6 +1,10 @@
 import models from '../model/models.js';
 import BaseRepositoryImpl from './BaseRepositoryImpl.js';
 
+
+
+
+
 export default class DiagnosesRepository extends BaseRepositoryImpl {
   /**
    * Create New Instance Diagnoses
@@ -8,13 +12,12 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
   constructor() {
     super(models.Diagnosis);
 
-
     this.diagnoses = models.Diagnosis;
   }
 
   /**
    * Create Diagnosis with Prediction From ML
-   * @param {{ predictions: { symptomsId: string[], diseaseId: string }[], user: Object }} options
+   * @param {{ predictions: { symptomNames: string[], diseaseId: string, confidence: number }[], user: Object }} options
    */
   async create(options) {
     const { predictions, user } = options;
@@ -24,18 +27,26 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
           // Create a single diagnosis for each prediction
           const diagnosis = await tx.diagnosis.create({
             data: {
+              confidence: prediction.confidence,
               diseaseId: prediction.diseaseId,
               userId: user.id,
               symptoms: {
-                connect: prediction.symptomsId.map((symptomId) => ({
-                  symptomId
+                create: prediction.symptomNames.map(name => ({
+                  symptom: {
+                    connect: { name },
+                  }
                 }))
               }
             },
             include: {
-              symptoms: true
+              symptoms: {
+                include: {
+                  symptom: true
+                }
+              }
             }
           });
+
 
           return diagnosis;
         })
@@ -46,75 +57,48 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
   }
 
   /**
-   * Find Diagnoses by User ID
-   * @param {string} userId
-   * @param {Object} [options] - Optional pagination and filtering options
-   * @returns {Promise<Array>} List of diagnoses
-   */
-  async findByUser(userId, options = {}) {
-    const {
-      page = 1,
-      limit = 10,
-      includeSymptoms = true,
-      orderBy = 'createdAt'
-    } = options;
-
-    return this.diagnoses.findMany({
-      where: { userId },
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: { [orderBy]: 'desc' },
-      include: {
-        symptoms: includeSymptoms
-      }
-    });
-  }
-
-  /**
-   * Find Diagnosis by ID with optional symptoms inclusion
-   * @param {string} id
-   * @param {boolean} [include=true]
-   * @returns {Promise<Object>} Diagnosis details
-   */
-  async findById(id, include = true) {
-    return this.diagnoses.findUnique({
-      where: { id },
-      include: {
-        symptoms: include,
-        user: include,
-        disease: true
-      }
-    });
-  }
-
-  /**
    * Update Diagnosis
-   * @param {string} id
-   * @param {Object} data - Update data
-   * @param {string[]} [newSymptomIds] - Optional new symptoms to associate
+   * @param {{userId: string, id: string}} data
+   * @param {string[]} [newSymptoms] - Optional new symptoms to associate
    * @returns {Promise<Object>} Updated diagnosis
    */
-  async update(id, data, newSymptomIds = []) {
+  async update(data, newSymptoms = []) {
+    const { id, userId } = data;
     return models.Client.$transaction(async (tx) => {
-      // Remove existing symptoms
+      // Remove existing symptoms from junction table
       await tx.symptomsOnDiagnoses.deleteMany({
         where: { diagnosisId: id }
       });
 
-      // Update diagnosis
+      // Reconnect symptoms using create (through junction)
       const updatedDiagnosis = await tx.diagnosis.update({
-        where: { id },
+        where: {
+          id,
+          AND: {
+            userId
+          }
+        },
         data: {
-          ...data,
           symptoms: {
-            connect: newSymptomIds.map((symptomId) => ({
-              symptomId
+            create: newSymptoms.map((name) => ({
+              symptom: {
+                connect: { name }
+              }
             }))
           }
         },
         include: {
-          symptoms: true,
-          disease: true
+          symptoms: {
+            include: {
+              symptom: true
+            }
+          },
+          disease: {
+            select: {
+              id: true,
+              name: true
+            }
+          }
         }
       });
 
@@ -122,14 +106,20 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
     });
   }
 
+
   /**
    * Delete Diagnosis by ID
-   * @param {string} id
+   * @param {{ userId: string, id: string }} data
    * @returns {Promise<Object>} Deleted diagnosis
    */
-  async delete(id) {
+  async delete(data) {
     return this.diagnoses.delete({
-      where: { id }
+      where: {
+        id: data.id,
+        AND: {
+          userId: data.userId,
+        }
+      }
     });
   }
 
@@ -176,23 +166,33 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
 
   /**
    * Retrieves diagnoses that contain all of the specified symptoms
-   * @param {Array<string>} symptoms - Array of symptom identifiers to match
+   * @param {Array<string>} symptoms - Array of symptom names to match
    * @returns {Promise<Array>} Array of diagnosis objects that include all specified symptoms
    */
-  async getDiagnosesBySymptoms(symptoms) {
+  async getBySymptoms(symptoms) {
     return this.diagnoses.findMany({
       where: {
         symptoms: {
           every: {
             symptom: {
-              in: symptoms
+              name: {
+                in: symptoms
+              }
             }
           }
-        },
+        }
       },
       include: {
-        symptoms: true,
-        disease: true
+        user: {
+          include: {
+            profile: true
+          }
+        },
+        symptoms: {
+          select: {
+            symptom: true
+          }
+        }
       }
     });
   }
@@ -202,14 +202,108 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
    * @param {string} diseaseId - The unique identifier of the disease
    * @returns {Promise<Array>} Array of diagnosis objects associated with the disease
    */
-  async getDiagnosesByDiseaseId(diseaseId) {
+  async getByDiseaseId(diseaseId) {
     return this.diagnoses.findMany({
       where: {
         diseaseId
       },
       include: {
-        symptoms: true,
-        disease: true
+        user: {
+          include: {
+            profile: true
+          },
+          omit: {
+            deletedAt: true,
+            password: true
+          }
+        },
+        disease: {
+          include: {
+            symptoms: {
+              select: {
+                symptom: true
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Retrieves diagnoses that contain all of the specified symptoms
+   * @param {{ userId: string, symptoms: Array<string> }} data - include  Array of symptom names to match and userId
+   * @returns {Promise<Array>} Array of diagnosis objects that include all specified symptoms
+   */
+  async getBySymptomsAndUserId(data) {
+    const { symptoms, userId } = data;
+    return this.diagnoses.findMany({
+      where: {
+        symptoms: {
+          every: {
+            symptom: {
+              name: {
+                in: symptoms
+              }
+            }
+          }
+        },
+        AND: {
+          userId
+        }
+      },
+      include: {
+        user: {
+          include: {
+            profile: true
+          },
+          omit: {
+            deletedAt: true,
+            password: true
+          }
+        },
+        symptoms: {
+          select: {
+            symptom: true
+          }
+        }
+      },
+    });
+  }
+
+  /**
+   * Retrieves all diagnoses for a specific disease
+   * @param {{ diseaseId: string, userId: string }} data - include of disease identifiers to match and userId
+   * @returns {Promise<Array>} Array of diagnosis objects associated with the disease
+   */
+  async getByDiseaseIdAndUserId(data) {
+    const { diseaseId, userId } = data;
+    return this.diagnoses.findMany({
+      where: {
+        userId,
+        AND: {
+          diseaseId
+        }
+      },
+      include: {
+        user: {
+          include: {
+            profile: true
+          },
+          omit: {
+            deletedAt: true,
+            password: true
+          }
+        },
+        disease: {
+          include: {
+            symptoms: {
+              select: {
+                symptom: true
+              }
+            }
+          }
+        }
       }
     });
   }
@@ -219,16 +313,71 @@ export default class DiagnosesRepository extends BaseRepositoryImpl {
    * @param {string} userId - The unique identifier of the user
    * @returns {Promise<Array>} Array of diagnosis objects associated with the user
    */
-  async getDiagnosesByUserId(userId) {
+  async getByUserId(userId) {
     return this.diagnoses.findMany({
       where: {
-        userId: userId,
+        userId: userId
       },
       include: {
-        user: true,
-        disease: true
+        user: {
+          include: {
+            profile: true
+          },
+          omit: {
+            deletedAt: true,
+            password: true
+          }
+        },
+        symptoms: {
+          select: {
+            symptom: true
+          }
+        },
+        disease: {
+          include: {
+            symptoms: {
+              select: {
+                symptom: true
+              }
+            }
+          }
+        }
       }
     });
   }
 
+  /**
+   * Get diagnoses with pagination
+   * @param {Object} options - The options object
+   * @param {Object} options.pagination - Pagination settings
+   * @param {number} [options.pagination.page=1] - Current page number
+   * @param {number} [options.pagination.limit=10] - Number of items per page
+   * @returns {Promise<{diseases: Array, pagination: Object}>} Object containing diagnoses and pagination info
+   */
+  async getAllByPagination(options) {
+    const page = options.pagination.page ?? 1;
+    const limit = options.pagination.limit ?? 10;
+    const offset = (page - 1) * limit;
+
+    const [diagnoses, totalCount] = await Promise.all([
+      this.diagnoses.findMany({
+        skip: offset,
+        take: limit
+      }),
+      this.diagnoses.count()
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return {
+      diagnoses,
+      pagination: {
+        currentPage: page,
+        totalItemsCount: totalPages,
+        itemsPerPage: limit,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1
+      }
+    };
+  }
 }
