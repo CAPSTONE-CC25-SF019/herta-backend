@@ -1,14 +1,12 @@
-import { expect } from 'chai';
-import {
-  CompactEncrypt,
-  SignJWT,
-  compactDecrypt,
-  importJWK,
-  jwtVerify
-} from 'jose';
+import { CompactEncrypt, SignJWT, compactDecrypt, importJWK, jwtVerify } from 'jose';
 import { readFile } from 'node:fs/promises';
 import { cwd } from 'node:process';
+import { TextEncoder , TextDecoder } from 'node:util';
 
+
+
+
+// eslint-disable-next-line
 it('should generate & verify JWE + JWS', async () => {
   try {
     // Load JWE Keys (ECDH-ES)
@@ -64,15 +62,17 @@ it('should generate & verify JWE + JWS', async () => {
       .setExpirationTime('5m')
       .sign(jwkPrivateKey);
 
+    // eslint-disable-next-line no-undef
     console.log('JWT Token:', token);
 
     // Verifikasi JWS
-    const { payload, protectedHeader } = await jwtVerify(token, jwkPublicKey, {
+    const { payload } = await jwtVerify(token, jwkPublicKey, {
       algorithms: ['EdDSA'],
       issuer: 'admin',
       audience: '192.168.1.10'
     });
 
+    // eslint-disable-next-line no-undef
     console.log('Verified Payload:', payload);
 
     // Dekripsi JWE
@@ -80,8 +80,10 @@ it('should generate & verify JWE + JWS', async () => {
       (await compactDecrypt(payload.data, jwePrivateKey)).plaintext
     );
 
+    // eslint-disable-next-line no-undef
     console.log('Decrypted Data:', decrypted);
   } catch (error) {
+    // eslint-disable-next-line no-undef
     console.error(error);
   }
 });
