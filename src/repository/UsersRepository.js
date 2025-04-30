@@ -119,6 +119,10 @@ export default class UsersRepository extends BaseRepositoryImpl {
       where: {
         email
       },
+      omit: {
+        deletedAt: true,
+        password: true
+      },
       data
     });
   }
@@ -146,8 +150,20 @@ export default class UsersRepository extends BaseRepositoryImpl {
       where: {
         email
       },
+      omit: {
+        deletedAt: true,
+        password: true,
+        role: true
+      },
       include: {
-        profile: true,
+        profile: {
+          select: {
+            id: true,
+            image: true,
+            age: true,
+            gender: true
+          }
+        },
         diagnoses: true
       }
     });
