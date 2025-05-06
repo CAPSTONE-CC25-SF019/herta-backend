@@ -144,7 +144,7 @@ export default class BaseService {
           fieldName: null,
           fieldValue: null
         });
-        errService.message = `the ${error.meta.modelName.toLowerCase()} ${error.meta.cause.toString().includes("found none") ? "not found" :error.meta.cause}`;
+        errService.message = `the ${error.meta.modelName.toLowerCase()} ${error.meta.cause.toString().includes('found none') ? 'not found' : error.meta.cause}`;
         throw errService;
       }
     }
