@@ -365,4 +365,28 @@ export default class UsersService extends BaseService {
       return this.handleError(error);
     }
   }
+
+  async getByEmail(options) {
+    try {
+      this.log.info(`Getting user with email: ${options.email}`);
+      const user = await this.usersRepository.getUserWithRelationByEmail(
+        options.email
+      );
+      if (!user) {
+        this.log.error(`User with email ${options?.email} not found`);
+        throw ErrorService.notFound({
+          entityName: this.entityName,
+          fieldName: 'email',
+          fieldValue: options.email
+        });
+      }
+      this.log.info(`User getting user with email ${options?.email}`);
+      return {
+        data: user
+      };
+    } catch (error) {
+      this.log.error(`Get error: ${error.message}`);
+      return this.handleError(error);
+    }
+  }
 }
